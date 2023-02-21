@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Martin Sulzmann" />
+  <title>IMP as an embedded domain-specific language (EDSL)</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">IMP as an embedded domain-specific language (EDSL)</h1>
+  <p class="author">
+Martin Sulzmann
+  </p>
+</div>
+<div id="overview" class="slide section level1">
+<h1>Overview</h1>
+<p>We will discuss:</p>
+<ul>
+<li>What are domain-specific languages (DSL)
+<ul>
+<li>aka external DSLs</li>
+</ul></li>
+<li>What are embedded domain-specific languages (EDSL)
+<ul>
+<li>aka internal DSLs</li>
+</ul></li>
+<li>Programming language methods to build EDSLs
+<ul>
+<li>We consider IMP as our running example</li>
+</ul></li>
+</ul>
+</div>
+<div id="dsls" class="slide section level1">
+<h1>DSLs</h1>
+<ul>
+<li><p>Typical Examples: HTML, lex, yacc, SQL, latex, ...</p></li>
+<li><p>Designed for a (domain) specific purpose</p></li>
+<li><p>Easy to use and apply by domain experts</p></li>
+<li><p>In comparison: general purpose langauges (GPL) such as C++, Java, ...</p></li>
+<li><p>Well, isn't C a domain-specific language for low-level systems programming?</p></li>
+<li><p>There's no clear borderline between DSLs and GPLs.</p></li>
+<li><p>Many DSLs have evolved into GPLs.</p></li>
+</ul>
+</div>
+<div id="designing-your-own-dsl" class="slide section level1">
+<h1>Designing your own DSL</h1>
+<p>Effectively means build your own compiler.</p>
+<ul>
+<li>Lexer/Parser</li>
+<li>Static checker</li>
+<li>Code generation</li>
+<li>Optimization, Analysis, Verification, ...</li>
+</ul>
+<p>There are tools to build DSLs</p>
+<ul>
+<li>lex/yacc</li>
+<li>compiler frameworks</li>
+<li>customized editors/IDEs, see Eclipse/GMF</li>
+<li>...</li>
+</ul>
+<p>But ...</p>
+<ul>
+<li>often need to rely on the magic behind some tools</li>
+<li>specific applications require specific extensions =&gt; constant EDSL evolution</li>
+</ul>
+</div>
+<div id="designing-your-own-edsl" class="slide section level1">
+<h1>Designing your own EDSL</h1>
+<p>Big idea:</p>
+<ul>
+<li>Don't start from scratch</li>
+<li>Embedd DSL into an existing (typically GPL) language</li>
+</ul>
+<p>EDSLs can be considered well-crafted APIs</p>
+<p>Advantage</p>
+<ul>
+<li><p>Keep the existing programming language eco system (familiar syntax, editor, ...)</p></li>
+<li><p>Generally, it becomes much easier to extend the DSL</p></li>
+<li>Focus on the interesting bits (semantics) and largely ignore the boring (syntax) bits.
+<ul>
+<li>Can well happen that once the EDSL design has stabilized, it's worthwhile to consider a stand-alone DSL (with better syntax support)</li>
+</ul></li>
+</ul>
+</div>
+<div id="outline" class="slide section level1">
+<h1>Outline</h1>
+<ul>
+<li>We take a look at EDSL design and methods
+<ul>
+<li>Shallow versus deep embedding</li>
+</ul></li>
+<li>Types and language concepts to build EDSs
+<ul>
+<li>Take advantage of the host's language type system</li>
+</ul></li>
+<li>Running example: Embedding of IMP in C++
+<ul>
+<li>The EDSL itself is not that exciting. Well, it's not that exciting to embed an imperative langauge into another imperative language</li>
+<li>But the methods and concepts we apply are interesting and easily transfer to other applications</li>
+</ul></li>
+</ul>
+</div>
+<div id="imp-as-a-shallow-edsl" class="slide section level1">
+<h1>IMP as a shallow EDSL</h1>
+<p>Shallow EDSL</p>
+<ul>
+<li>Direct mapping of DSL constructs to constructs of the host language</li>
+</ul>
+<h2 id="values">Values</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">union</span> VALUE {
+  <span class="dt">int</span> intValue;
+  <span class="dt">bool</span> boolValue;
+};</code></pre></div>
+<h2 id="expressions-variables-and-assignment">Expressions, variables and assignment</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">class</span> EXP {
+ <span class="kw">public</span>:
+  VALUE val;
+  EXP() {}
+  EXP(<span class="dt">int</span> x) {  val.intValue = x; }
+  EXP(<span class="dt">bool</span> x) { val.boolValue = x; }
+  <span class="dt">int</span> intVal() { <span class="kw">return</span> val.intValue; }
+  <span class="dt">int</span> boolVal() { <span class="kw">return</span> val.boolValue; }
+};
+
+<span class="kw">class</span> VAR {
+ <span class="kw">public</span>:
+  EXP e;
+  VAR() {}
+  VAR(EXP _e) { e = _e; }
+  VAR&amp; <span class="kw">operator</span>=(EXP x)  { e = x; }
+  EXP value() { <span class="kw">return</span> e; }
+  <span class="dt">int</span> intVal() { <span class="kw">return</span> e.intVal(); }
+  <span class="dt">int</span> boolVal() { <span class="kw">return</span> e.boolVal(); }
+};</code></pre></div>
+<p>You can see now why we use C++ instead of Java. C++ has the advantage that we can overload certain operators.</p>
+<h2 id="shallow-expression-combinators">Shallow Expression combinators</h2>
+<p>EDSL constructs are mapped directly to C++ constructs.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">EXP <span class="kw">operator</span>&amp;&amp;(EXP l, EXP r) {
+  <span class="kw">return</span> EXP(l.val.boolValue &amp;&amp; r.val.boolValue);
+}
+
+EXP <span class="kw">operator</span>!(EXP e) {
+  <span class="kw">return</span> EXP(! e.val.boolValue);
+}
+
+EXP <span class="kw">operator</span>+(EXP l, EXP r) {
+  <span class="kw">return</span> EXP(l.val.intValue + r.val.intValue);
+}
+
+EXP <span class="kw">operator</span>-(EXP l, EXP r) {
+  <span class="kw">return</span> EXP(l.val.intValue - r.val.intValue);
+}
+EXP <span class="kw">operator</span>-(VAR v, EXP r) {
+  <span class="kw">return</span> v.value() - r;
+}
+EXP <span class="kw">operator</span>-(VAR v, <span class="dt">int</span> i) {
+  <span class="kw">return</span> v.value() - EXP(i);
+}
+
+EXP <span class="kw">operator</span>*(EXP l, EXP r) {
+  <span class="kw">return</span> EXP(l.val.intValue * r.val.intValue);
+}
+EXP <span class="kw">operator</span>*(VAR v, EXP r) {
+  <span class="kw">return</span> v.value() * r;
+}
+EXP <span class="kw">operator</span>*(VAR v1, VAR v2) {
+  <span class="kw">return</span> v1.value() * v2.value();
+}
+
+EXP <span class="kw">operator</span>&gt;(EXP l, EXP r) {
+  <span class="kw">return</span> EXP(l.val.intValue &gt; r.val.intValue);
+}
+EXP <span class="kw">operator</span>&gt;(VAR v, EXP r) {
+  <span class="kw">return</span> v.value() &gt; r;
+}
+EXP <span class="kw">operator</span>&gt;(VAR v, <span class="dt">int</span> x) {
+  <span class="kw">return</span> v.value() &gt; EXP(x);
+}
+
+EXP <span class="kw">operator</span>==(EXP e, <span class="dt">bool</span> b) {
+  <span class="kw">return</span> EXP(e.val.boolValue == b);
+}</code></pre></div>
+<p>Point to note. Combinators are &quot;unsafe&quot; in the sense that in case of <code>+</code> for example we assume the left and right arguments evaluate to integer values.</p>
+<h2 id="factorial-example">Factorial Example</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main() {
+  <span class="co">// factorial</span>
+  <span class="dt">int</span> _n = <span class="dv">3</span>;
+  VAR n = VAR(EXP(_n));
+  VAR a = VAR(EXP(_n));
+
+  <span class="kw">while</span> ( (n &gt; <span class="dv">1</span>).boolVal() ) {
+    n = n - <span class="dv">1</span>;
+    a = a * n;
+  }
+}</code></pre></div>
+<ul>
+<li>IMP expressions and assignment are embedded in C++</li>
+<li>We didn't define any IMP control constructs because we simply make use of the constructs available in C++.</li>
+</ul>
+<h2 id="programs-which-generate-edsl-programs">Programs which generate EDSL programs</h2>
+<p>The great advantage of an EDSL is that we can make use of the host language to &quot;extend&quot; the EDSL.</p>
+<p>Currently, IMP has no concept of functions. Never mind, let's simply make use of C++ functions. The below function <code>fac</code> is a C++ functions which generates an expression in our IMP EDSL.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">EXP fac(<span class="dt">int</span> n) {
+  <span class="kw">if</span>(n &lt;= <span class="dv">1</span>) {
+    <span class="kw">return</span> EXP(<span class="dv">1</span>);
+  }
+  <span class="kw">else</span> {
+    <span class="kw">return</span> EXP(n) * fac(n<span class="dv">-1</span>);
+  }
+}</code></pre></div>
+<p>This is a fairly simple example but should give you the idea of the advantages and power of an EDSL.</p>
+</div>
+<div id="imp-as-a-deep-edsl" class="slide section level1">
+<h1>IMP as a deep EDSL</h1>
+<p>Deep EDSL (&quot;deeply embedded DSL&quot;)</p>
+<ul>
+<li>First map DSL constructs to some AST representation which then will later be evaluated.</li>
+</ul>
+<h2 id="values-and-expressions">Values and expressions</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="co">// like before</span>
+<span class="kw">union</span> VALUE {
+  <span class="dt">int</span> intValue;
+  <span class="dt">bool</span> boolValue;
+};</code></pre></div>
+<p>We use the composite pattern to represent the various syntactic constructs of IMP expressions.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">class</span> EXP {
+ <span class="kw">public</span>:
+  VALUE val;
+  EXP() {}
+  EXP(<span class="dt">int</span> x) {   val.intValue = x; }
+  EXP(<span class="dt">bool</span> x) {  val.boolValue = x; }
+  <span class="kw">virtual</span> VALUE eval() { <span class="kw">return</span> val; }
+};
+
+
+
+<span class="kw">class</span> VAR : <span class="kw">public</span> EXP {
+ <span class="kw">public</span>:
+  VAR(<span class="dt">int</span> x) { val.intValue = x; }
+  VAR(<span class="dt">bool</span> x) { val.boolValue = x; }
+  <span class="kw">virtual</span> VALUE eval() { <span class="kw">return</span> val; }
+};
+
+
+<span class="kw">class</span> MINUS : <span class="kw">public</span> EXP {
+  EXP *l;
+  EXP *r;
+ <span class="kw">public</span>:
+  MINUS(EXP* _l, EXP* _r) { l = _l; r = _r; }
+  VALUE eval() {
+    VALUE v;
+    v.intValue = l-&gt;eval().intValue - r-&gt;eval().intValue;
+    <span class="kw">return</span> v;
+  }
+};
+
+<span class="kw">class</span> MULT : <span class="kw">public</span> EXP {
+  EXP *l;
+  EXP *r;
+ <span class="kw">public</span>:
+  MULT(EXP* _l, EXP* _r) { l = _l; r = _r; }
+  VALUE eval() {
+    VALUE v;
+    v.intValue = l-&gt;eval().intValue * r-&gt;eval().intValue;
+    <span class="kw">return</span> v;
+  }
+};
+
+<span class="kw">class</span> GT : <span class="kw">public</span> EXP {
+  EXP *l;
+  EXP *r;
+ <span class="kw">public</span>:
+  GT(EXP* _l, EXP* _r) { l = _l; r = _r; }
+  VALUE eval() {
+    VALUE v;
+    v.boolValue = l-&gt;eval().intValue &gt; r-&gt;eval().intValue;
+    <span class="kw">return</span> v;
+  }  
+
+};</code></pre></div>
+<h2 id="commands">Commands</h2>
+<p>Similarly, we now represent IMP commands.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">class</span> CMD {
+ <span class="kw">public</span>:
+  <span class="kw">virtual</span> <span class="dt">void</span> run() = <span class="dv">0</span>;
+ 
+};
+
+
+
+<span class="kw">class</span> ASSIGN : <span class="kw">public</span> CMD {
+  VAR* v;
+  EXP* e;
+ <span class="kw">public</span>:
+  ASSIGN(VAR* _v, EXP* _e) {
+    v = _v; e = _e;
+  }
+  <span class="dt">void</span> run() {
+    v-&gt;val = e-&gt;eval();
+  }
+};
+
+
+<span class="kw">class</span> SEQ : <span class="kw">public</span> CMD {
+  CMD *l;
+  CMD *r;
+<span class="kw">public</span>:
+  SEQ(CMD* _l, CMD* _r) {
+    l = _l; r = _r;
+  }
+  <span class="dt">void</span> run() {
+    l-&gt;run() ; r-&gt;run();
+  }
+
+};
+
+<span class="kw">class</span> WHILE : <span class="kw">public</span> CMD {
+  EXP* e;
+  CMD* b;
+ <span class="kw">public</span>:
+  WHILE(EXP* _e, CMD* _b) {
+    e = _e; b = _b;
+  }
+  <span class="dt">void</span> run() {
+    <span class="dt">bool</span> c;
+    c = e-&gt;eval().boolValue;    
+    <span class="kw">while</span>(c) {
+      b-&gt;run();
+      c = e-&gt;eval().boolValue;    
+    }
+  } 
+};</code></pre></div>
+<h2 id="factorial-example-1">Factorial Example</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="dt">int</span> main() {
+
+  VAR* n = <span class="kw">new</span> VAR(<span class="dv">3</span>);
+  VAR* a = <span class="kw">new</span> VAR(<span class="dv">3</span>);
+
+  <span class="co">// factorial</span>
+  CMD* c = <span class="kw">new</span> WHILE(<span class="kw">new</span> GT(n, <span class="kw">new</span> EXP(<span class="dv">1</span>)),
+                     <span class="kw">new</span> SEQ(
+            <span class="kw">new</span> ASSIGN(n, <span class="kw">new</span> MINUS(n, <span class="kw">new</span> EXP(<span class="dv">1</span>))),
+            <span class="kw">new</span> ASSIGN(a, <span class="kw">new</span> MULT(a,n))));
+
+
+
+  c-&gt;run();
+
+  cout &lt;&lt; a-&gt;eval().intValue &lt;&lt; endl;
+}</code></pre></div>
+<p>There are two points to note:</p>
+<ul>
+<li>Writing IMP expressions/commands is now pretty wordy
+<ul>
+<li>See up-coming &quot;Deep EDSL User Interface&quot;</li>
+</ul></li>
+<li>We can easily write ill-typed IMP expressions/commands (applys also to shallow EDSL)
+<ul>
+<li>See up-coming &quot;Strongly Typed EDSL Interface&quot;</li>
+</ul></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">{
+  <span class="co">// some ill-typed expression: true + fac(3)</span>
+  VAR* v = <span class="kw">new</span> VAR(<span class="kw">true</span>);
+  EXP* e = <span class="kw">new</span> MULT(v,fac(<span class="dv">3</span>));
+  cout &lt;&lt; e-&gt;eval().intValue &lt;&lt; endl;
+}</code></pre></div>
+<h2 id="technical-point-mixing-deep-and-shallow-embeddings">Technical point: Mixing deep and shallow embeddings</h2>
+<p>It would be nice if we could keep the shallow expression EDSL and mix it with a deep command EDSL. Unfortunately, this won't work so easily in a strict language such as C++. For example, consider</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">  VAR a = VAR(EXP(<span class="dv">3</span>));
+  CMD c* = ASSIGN(a, a<span class="dv">-1</span>)</code></pre></div>
+<p>The problem is that the shallow EDSL expression <code>a-1</code> gets immediately evaluated. That is, on the right-hand side we will always find the constant value <code>2</code>. This is obviously a problem in case the <code>ASSIGN</code> statement appears within <code>WHILE</code>.</p>
+<p>One approach in C++ to solve this issue is to turn EDSL code into &quot;templates&quot; (this will look quite horribly, so we won't pursue this direction). Another approach: Abandon C++. Languages such as Haskell and Scala provide excellent support for EDSL integration (e.g. lazy evaluation).</p>
+</div>
+<div id="deep-edsl-user-interface" class="slide section level1">
+<h1>Deep EDSL User Interface</h1>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">  <span class="co">// factorial</span>
+  CMD* c = <span class="kw">new</span> WHILE(<span class="kw">new</span> GT(n, <span class="kw">new</span> EXP(<span class="dv">1</span>)),
+                     <span class="kw">new</span> SEQ(
+            <span class="kw">new</span> ASSIGN(n, <span class="kw">new</span> MINUS(n, <span class="kw">new</span> EXP(<span class="dv">1</span>))),
+            <span class="kw">new</span> ASSIGN(a, <span class="kw">new</span> MULT(a,n))));</code></pre></div>
+<p>Several approaches to make the above look nicer.</p>
+<ul>
+<li>Method chaining (sketch)
+<ul>
+<li>Methods return <code>this</code></li>
+<li>Accumulate program</li>
+</ul></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">  CMD *c = <span class="kw">new</span> CMD();
+  c-&gt;whileLoop(gt(n,exp(<span class="dv">1</span>)))
+     -&gt;assign(n, minus,exp(<span class="dv">1</span>))
+     -&gt;assign(a, mult(a,n))</code></pre></div>
+<ul>
+<li>Monadic style (sketch)
+<ul>
+<li>Hiding side effects</li>
+<li><code>p</code> accumulates program<br />
+</li>
+<li>Unsafe in C++/Java (can't overload <code>;</code>)</li>
+<li>See Scala, Haskell, support integration of arbitrary side effects</li>
+</ul></li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">  {
+   PROG p;
+
+   VAR n(<span class="dv">3</span>);
+   VAR a(<span class="dv">3</span>);
+
+   whileStart(gt(n,exp(<span class="dv">1</span>)));
+     assign(n, minus(n, exp(<span class="dv">1</span>)));
+     assign(a, mult(a,n)); 
+   whileEnd();
+  }</code></pre></div>
+</div>
+<div id="strongly-typed-edsl-interface" class="slide section level1">
+<h1>Strongly Typed EDSL Interface</h1>
+<p>We make use of the C++ typing rules to enforce well-typing of IMP EDSL expressions/commands. At the same time, we provide a nicer interface.</p>
+<h2 id="first-main-idea-phantom-types">First main idea: Phantom types</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span>&lt;<span class="kw">typename</span> T&gt;
+<span class="kw">class</span> TY_EXP {
+ <span class="kw">public</span>:
+  EXP *e;
+  TY_EXP(EXP* _e) { e = _e; }  
+  T eval() = <span class="dv">0</span>;
+};</code></pre></div>
+<ul>
+<li>We embed <code>EXP</code> in <code>TY_EXP</code></li>
+<li>Notice that the template parameter <code>T</code> doesn't appear in the class declaration</li>
+<li>We call <code>T</code> a <em>phantom</em> type parameter whose sole purpose is to express that we have an IMP EDSL expression of type <code>T</code></li>
+</ul>
+<p>In IMP, we actually only care about the two specialized cases <code>int</code> and <code>bool</code>, but C++ demands that we also must provide the generic template case.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp"><span class="kw">template</span>&lt;&gt;
+<span class="kw">class</span> TY_EXP&lt;<span class="dt">int</span>&gt; {
+ <span class="kw">public</span>:
+  EXP *e;
+  TY_EXP() {}
+  TY_EXP(<span class="dt">int</span> i) { e = <span class="kw">new</span> EXP(i); }
+  TY_EXP(EXP* _e) { e = _e; }  
+  <span class="dt">int</span> eval() { <span class="kw">return</span> e-&gt;eval().intValue; }
+};
+
+<span class="kw">template</span>&lt;&gt;
+<span class="kw">class</span> TY_EXP&lt;<span class="dt">bool</span>&gt; {
+ <span class="kw">public</span>:
+  EXP *e;
+  TY_EXP() {}
+  TY_EXP(<span class="dt">bool</span> b) { e = <span class="kw">new</span> EXP(b); }
+  TY_EXP(EXP* _e) { e = _e; }  
+  <span class="dt">bool</span> eval() { <span class="kw">return</span> e-&gt;eval().boolValue; }
+};</code></pre></div>
+<h2 id="second-main-idea-encoding-of-typing-rules-via-combinators">Second main idea: Encoding of typing rules via combinators</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">TY_EXP&lt;<span class="dt">int</span>&gt; mult(TY_EXP&lt;<span class="dt">int</span>&gt; l, TY_EXP&lt;<span class="dt">int</span>&gt; r) {
+  <span class="kw">return</span> TY_EXP&lt;<span class="dt">int</span>&gt;(<span class="kw">new</span> MULT(l.e, r.e));
+}</code></pre></div>
+<p>The above combinator <code>mult</code> effectively encodes the following typing rule.</p>
+<pre><code>    G |- l : int   G |- r : int
+   --------------------------
+      G |- l * r : int </code></pre>
+<p>What about the type environment <code>G</code>? Well, C++ scoping rules take care of the type environment.</p>
+<p>Below are further combinators to encode the remaining IMP typing rules.</p>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">TY_EXP&lt;<span class="dt">int</span>&gt; minus(TY_EXP&lt;<span class="dt">int</span>&gt; l, TY_EXP&lt;<span class="dt">int</span>&gt; r) {
+  <span class="kw">return</span> TY_EXP&lt;<span class="dt">int</span>&gt;(<span class="kw">new</span> MINUS(l.e, r.e));
+}
+
+TY_EXP&lt;<span class="dt">bool</span>&gt; gt(TY_EXP&lt;<span class="dt">int</span>&gt; l, TY_EXP&lt;<span class="dt">int</span>&gt; r) {
+  <span class="kw">return</span> TY_EXP&lt;<span class="dt">bool</span>&gt;(<span class="kw">new</span> GT(l.e, r.e));
+}
+
+TY_EXP&lt;<span class="dt">int</span>&gt; var(<span class="dt">int</span> x) {
+  <span class="kw">return</span> TY_EXP&lt;<span class="dt">int</span>&gt;(<span class="kw">new</span> VAR(x));
+}
+
+TY_EXP&lt;<span class="dt">bool</span>&gt; var(<span class="dt">bool</span> x) {
+  <span class="kw">return</span> TY_EXP&lt;<span class="dt">bool</span>&gt;(<span class="kw">new</span> VAR(x));
+}
+
+
+TY_EXP&lt;<span class="dt">int</span>&gt; constant(<span class="dt">int</span> x) {
+  <span class="kw">return</span> TY_EXP&lt;<span class="dt">int</span>&gt;(<span class="kw">new</span> EXP(x));
+}
+
+TY_EXP&lt;<span class="dt">bool</span>&gt; constant(<span class="dt">bool</span> x) {
+  <span class="kw">return</span> TY_EXP&lt;<span class="dt">bool</span>&gt;(<span class="kw">new</span> EXP(x));
+}</code></pre></div>
+<h2 id="example">Example</h2>
+<div class="sourceCode"><pre class="sourceCode cpp"><code class="sourceCode cpp">TY_EXP&lt;<span class="dt">int</span>&gt; fac(<span class="dt">int</span> n) {
+  <span class="kw">if</span>(n &lt;= <span class="dv">1</span>) {
+    <span class="kw">return</span> constant(<span class="dv">1</span>);
+  }
+  <span class="kw">else</span> {
+    <span class="kw">return</span> mult(constant(n), fac(n<span class="dv">-1</span>));
+  }
+
+}
+
+<span class="dt">int</span> main() {
+  <span class="co">// OK: 1 + fac(3)</span>
+  {
+   TY_EXP&lt;<span class="dt">int</span>&gt; v(<span class="dv">1</span>); 
+   TY_EXP&lt;<span class="dt">int</span>&gt; e;
+   e = mult(v, fac(<span class="dv">3</span>));
+  }
+
+
+  <span class="co">// FAIL: true + fac(3)</span>
+  {
+   TY_EXP&lt;<span class="dt">bool</span>&gt; v(<span class="kw">true</span>); 
+   TY_EXP&lt;<span class="dt">int</span>&gt; e;
+   e = mult(v, fac(<span class="dv">3</span>));
+  }
+
+}</code></pre></div>
+</div>
+<div id="exercise-adding-security-types" class="slide section level1">
+<h1>Exercise: Adding Security Types</h1>
+<p>Encode the IMP security type system from the lecture.</p>
+<p>Hints will be provided later</p>
+</div>
+<div id="summary" class="slide section level1">
+<h1>Summary</h1>
+<ul>
+<li>EDSLs are an idea from the past</li>
+<li>EDSLs are the future:
+<ul>
+<li>DO: Embed</li>
+<li>DONT: Write your compiler from scratch</li>
+</ul></li>
+<li>What's new is the application of modern programming language technology
+<ul>
+<li>Strong typing</li>
+<li>Overloading of syntax</li>
+<li>Language with good support for EDSL design (Haskell, Scala)</li>
+</ul></li>
+<li>We have discussed
+<ul>
+<li>Shallow versus deeply embedded DSLs
+<ul>
+<li>Pro shallow: Often easier to design</li>
+<li>Pro deep: Different back-ends (interpreter, compiler, pretty printer), optimizations</li>
+</ul></li>
+<li>Type-safe interface</li>
+</ul></li>
+<li>Pro EDSL
+<ul>
+<li>Integration in familiar environment</li>
+<li>Easy to adapt and customize</li>
+</ul></li>
+<li>Cons EDSL
+<ul>
+<li>Lack of domain-specific error messages (in our case cryptic template error messages)</li>
+</ul></li>
+</ul>
+</div>
+</body>
+</html>

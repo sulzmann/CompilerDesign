@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Martin Sulzmann" />
+  <title>Virtual Machine</title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="http://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="http://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Virtual Machine</h1>
+  <p class="author">
+Martin Sulzmann
+  </p>
+</div>
+<div class="slide section level6">
+
+<p>Some stack-based virtual machine (VM) capable of concurrency.</p>
+<div class="sourceCode"><pre class="sourceCode ocaml"><code class="sourceCode ocaml"><span class="co">(* A simple stack-based VM with shared memory *)</span>
+
+<span class="co">(* VM supports only integers, so booleans need to be mapped to integer</span>
+<span class="co">   where 0 = false and 1 = true</span>
+
+<span class="co">Each thread has two type of stacks.</span>
+<span class="co">One for arithmetic computations and one for maintaining run-time information.</span>
+
+<span class="co">There are no registers but we can make use of some global memory cells.</span>
+
+<span class="co">There is also support for concurrency by starting a new thread</span>
+<span class="co">and locking memory cells.</span>
+
+<span class="co"> *)</span>
+
+<span class="kw">type</span> instructions =
+                  <span class="dt">Halt</span>
+    
+                  <span class="co">(* Stack operations </span>
+<span class="co"> </span>
+<span class="co">                      PopS simply drops top-most value</span>
+<span class="co">                      Add  pops two top-most values and</span>
+<span class="co">                           pushes result onto stack</span>
+<span class="co">                          </span>
+<span class="co">                           The order matters for Div, ...</span>
+<span class="co">                           We first pop the left then the right operand</span>
+
+<span class="co">                      Output Prints top-most value onto console</span>
+
+<span class="co">                  *)</span>
+                  | <span class="dt">PushS</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">PopS</span>
+                  | <span class="dt">Add</span> 
+                  | <span class="dt">Sub</span>
+                  | <span class="dt">Div</span>
+                  | <span class="dt">Mult</span>
+                  | <span class="dt">Lt</span>
+                  | <span class="dt">Gt</span>
+                  | <span class="dt">Eq</span>
+
+                  | <span class="dt">Output</span>
+
+                  <span class="co">(* (Conditional) jumps </span>
+
+<span class="co">                     Set PC to position indicated where</span>
+<span class="co">                     the position refers to the position in the list of instructions.</span>
+<span class="co">                     First position = 0 !</span>
+
+<span class="co">                     Jump = absolute address</span>
+
+<span class="co">                     JumpMemLoc == address stored in memory location,</span>
+<span class="co">                                   necessary for &quot;return&quot;</span>
+
+<span class="co">                     NonZero/Zero will pop the jump address.</span>
+
+<span class="co">                  *)</span>
+                  | <span class="dt">NonZero</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">Zero</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">Jump</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">JumpMemLoc</span> <span class="kw">of</span> <span class="dt">int</span>                              
+          
+
+                  <span class="co">(* Memory operations </span>
+
+<span class="co">                    Assign (memLoc, valInteger)</span>
+
+<span class="co">                    PushToStack memLoc</span>
+
+<span class="co">                           push value stored in memory cell memLoc onto stack</span>
+
+<span class="co">                    AssignFromStack (relStackPos, memLoc)</span>
+<span class="co">                        stack remains unchanged</span>
+<span class="co">                        relStackPos = 1 to access top-most element</span>
+
+<span class="co">                  *)</span>
+
+                  | <span class="dt">Assign</span> <span class="kw">of</span> <span class="dt">int</span>*<span class="dt">int</span>
+                  | <span class="dt">PushToStack</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">AssignFromStack</span> <span class="kw">of</span> <span class="dt">int</span>*<span class="dt">int</span>
+
+                  <span class="co">(* run-time (environment) stack </span>
+
+<span class="co">                      PushE i</span>
+<span class="co">                      PopE</span>
+<span class="co"> </span>
+<span class="co">                          as for computation stack</span>
+
+<span class="co">                      PushToEnv memLoc                 </span>
+<span class="co"> </span>
+<span class="co">                           push value stored in memory cell memLoc onto env stack</span>
+
+<span class="co">                      AssignFromEnv (relEnvStackPos, memLoc)</span>
+
+<span class="co">                        same as AssignFromStack but for env stack</span>
+
+
+<span class="co">                      UpdateToEnv (relEnvStackPos, memLoc)</span>
+
+<span class="co">                         Update relEnvStackPos with memLoc</span>
+
+<span class="co">                         This is more of a convenience function as we could</span>
+<span class="co"> </span>
+<span class="co">                         1. pop the top-most relEnvStack positions and store</span>
+<span class="co">                            them into some temporary memory locations</span>
+
+<span class="co">                         2. pop the top-most (the position we are interested in)</span>
+
+<span class="co">                         3. push memLoc (its value)</span>
+
+<span class="co">                         4. restore the other elements by pushing their values</span>
+<span class="co">                            stored into some temporary memory locations</span>
+<span class="co">                            back onto the stack</span>
+
+<span class="co">                  *)</span>
+
+                  | <span class="dt">PushE</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">PopE</span>
+                  | <span class="dt">PushToEnv</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">AssignFromEnv</span> <span class="kw">of</span> <span class="dt">int</span>*<span class="dt">int</span>
+                  | <span class="dt">UpdateToEnv</span> <span class="kw">of</span> <span class="dt">int</span>*<span class="dt">int</span>                                           
+
+                  <span class="co">(* shared memory and concurrency *)</span>
+                  | <span class="dt">Lock</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">Unlock</span> <span class="kw">of</span> <span class="dt">int</span>
+                  | <span class="dt">Thread</span> <span class="kw">of</span> instructions <span class="dt">list</span>
+                                
+<span class="kw">type</span> lockInfo = { locked : <span class="dt">bool</span>;
+                  threadID : <span class="dt">int</span> }                             
+
+<span class="co">(* sp and ep refer to the next available position *)</span>
+<span class="kw">type</span> thread = { pc : <span class="dt">int</span> <span class="dt">ref</span>;
+                code : instructions <span class="dt">list</span>;
+                stack : <span class="dt">int</span> <span class="dt">array</span>;
+                env : <span class="dt">int</span> <span class="dt">array</span>;
+                sp : <span class="dt">int</span> <span class="dt">ref</span>;
+                ep : <span class="dt">int</span> <span class="dt">ref</span>}
+
+<span class="kw">type</span> state = { mem : <span class="dt">int</span> <span class="dt">array</span>;
+               memLock : lockInfo <span class="dt">array</span>;
+               threads : (thread <span class="dt">list</span>) <span class="dt">ref</span>;
+               activeThread : <span class="dt">int</span> <span class="dt">ref</span>}
+               
+
+<span class="kw">let</span> nameSupply = <span class="dt">ref</span> <span class="dv">1</span>
+<span class="kw">let</span> fresh _ =  nameSupply := !nameSupply + <span class="dv">1</span>;
+               !nameSupply
+
+<span class="co">(* global shared memory *)</span>
+<span class="kw">let</span> memSize = <span class="dv">20000</span>
+<span class="kw">let</span> mkMem _ = Array<span class="kw">.</span>make memSize <span class="dv">0</span>
+
+<span class="kw">let</span> mkMemLock _ = Array<span class="kw">.</span>make memSize {locked = <span class="kw">false</span>; threadID = <span class="dv">0</span>}
+                         
+<span class="co">(* computation stack *)</span>
+<span class="kw">let</span> stkSize = <span class="dv">20000</span>
+<span class="kw">let</span> mkStk _ = Array<span class="kw">.</span>make stkSize <span class="dv">0</span>
+
+<span class="co">(* run-time environment stack *)</span>
+<span class="kw">let</span> envSize = <span class="dv">20000</span>
+<span class="kw">let</span> mkEnv _ = Array<span class="kw">.</span>make envSize <span class="dv">0</span>
+               
+<span class="kw">let</span> mkThread cs = { pc = <span class="dt">ref</span> <span class="dv">0</span>;
+                    code = cs;
+                    stack = mkStk();
+                    env = mkEnv();
+                    sp = <span class="dt">ref</span> <span class="dv">0</span>;
+                    ep = <span class="dt">ref</span> <span class="dv">0</span> }
+
+<span class="kw">let</span> initState cs = { mem = mkMem();
+                     memLock = mkMemLock();
+                     threads = <span class="dt">ref</span> [mkThread cs];
+                     activeThread = <span class="dt">ref</span> <span class="dv">0</span>}
+
+<span class="kw">let</span> inc r = r := !r + <span class="dv">1</span>
+<span class="kw">let</span> dec r = r := !r - <span class="dv">1</span> 
+                     
+                    
+<span class="kw">let</span> singleStep st id mem memLock t = <span class="kw">match</span> (List<span class="kw">.</span>nth t.code !(t.pc)) <span class="kw">with</span>
+  | <span class="dt">Halt</span> -&gt;   <span class="kw">true</span>
+  | <span class="dt">PushS</span> i -&gt; t.stack.(!(t.sp)) &lt;- i;
+               inc t.pc;
+               inc t.sp;
+               <span class="kw">false</span>
+
+  | <span class="dt">PopS</span> -&gt; inc t.pc;
+            dec t.sp;
+            <span class="kw">false</span>            
+
+  <span class="co">(* recall that sp refers to the next available position,</span>
+<span class="co">     so must subtract 1 to access top element *)</span>              
+  | <span class="dt">Add</span> -&gt; <span class="kw">let</span> i = !(t.sp) - <span class="dv">1</span>
+           <span class="kw">in</span> t.stack.(i<span class="dv">-1</span>) &lt;- t.stack.(i<span class="dv">-1</span>) + t.stack.(i);
+              inc t.pc;
+              dec t.sp;
+              <span class="kw">false</span>
+
+  | <span class="dt">Sub</span> -&gt; <span class="kw">let</span> i = !(t.sp) - <span class="dv">1</span>
+           <span class="kw">in</span> t.stack.(i<span class="dv">-1</span>) &lt;- t.stack.(i<span class="dv">-1</span>) - t.stack.(i);
+              inc t.pc;
+              dec t.sp;
+              <span class="kw">false</span>
+
+  | <span class="dt">Div</span> -&gt; <span class="kw">let</span> i = !(t.sp) - <span class="dv">1</span>
+           <span class="kw">in</span> t.stack.(i<span class="dv">-1</span>) &lt;- t.stack.(i<span class="dv">-1</span>) / t.stack.(i);
+              inc t.pc;
+              dec t.sp;
+              <span class="kw">false</span>
+
+  | <span class="dt">Mult</span> -&gt; <span class="kw">let</span> i = !(t.sp) - <span class="dv">1</span>
+            <span class="kw">in</span> t.stack.(i<span class="dv">-1</span>) &lt;- t.stack.(i<span class="dv">-1</span>) * t.stack.(i);
+               inc t.pc;
+               dec t.sp;
+               <span class="kw">false</span>                                
+
+  | <span class="dt">Lt</span> -&gt; <span class="kw">let</span> i = !(t.sp) - <span class="dv">1</span>
+          <span class="kw">in</span> (<span class="kw">if</span> t.stack.(i<span class="dv">-1</span>) &lt; t.stack.(i)
+              <span class="kw">then</span> t.stack.(i<span class="dv">-1</span>) &lt;- <span class="dv">1</span>
+              <span class="kw">else</span> t.stack.(i<span class="dv">-1</span>) &lt;- <span class="dv">0</span>);
+             inc t.pc;
+             dec t.sp;
+             <span class="kw">false</span>
+
+  | <span class="dt">Gt</span> -&gt; <span class="kw">let</span> i = !(t.sp) - <span class="dv">1</span>
+          <span class="kw">in</span> (<span class="kw">if</span> t.stack.(i<span class="dv">-1</span>) &gt; t.stack.(i)
+              <span class="kw">then</span> t.stack.(i<span class="dv">-1</span>) &lt;- <span class="dv">1</span>
+              <span class="kw">else</span> t.stack.(i<span class="dv">-1</span>) &lt;- <span class="dv">0</span>);
+             inc t.pc;
+             dec t.sp;
+             <span class="kw">false</span>
+
+  | <span class="dt">Eq</span> -&gt; <span class="kw">let</span> i = !(t.sp) - <span class="dv">1</span>
+          <span class="kw">in</span> (<span class="kw">if</span> t.stack.(i<span class="dv">-1</span>) == t.stack.(i)
+              <span class="kw">then</span> t.stack.(i<span class="dv">-1</span>) &lt;- <span class="dv">1</span>
+              <span class="kw">else</span> t.stack.(i<span class="dv">-1</span>) &lt;- <span class="dv">0</span>);
+             inc t.pc;
+             dec t.sp;
+             <span class="kw">false</span>                              
+                 
+  | <span class="dt">Output</span> -&gt; Printf<span class="kw">.</span>printf <span class="st">&quot;%d </span><span class="ch">\n</span><span class="st">&quot;</span> t.stack.(!(t.sp) - <span class="dv">1</span>);
+              inc t.pc;
+              <span class="kw">false</span>
+
+  | <span class="dt">NonZero</span> i -&gt; <span class="kw">let</span> x = t.stack.(!(t.sp) - <span class="dv">1</span>) <span class="kw">in</span>
+                 dec t.sp;
+                 (<span class="kw">if</span> x == <span class="dv">0</span>
+                 <span class="kw">then</span> inc t.pc
+                 <span class="kw">else</span> t.pc := i);
+                 <span class="kw">false</span>
+
+  | <span class="dt">Zero</span> i -&gt;    <span class="kw">let</span> x = t.stack.(!(t.sp) - <span class="dv">1</span>) <span class="kw">in</span>
+                 dec t.sp;
+                 (<span class="kw">if</span> x == <span class="dv">0</span>
+                 <span class="kw">then</span> t.pc := i
+                 <span class="kw">else</span> inc t.pc);
+                 <span class="kw">false</span>
+
+  | <span class="dt">Jump</span> i -&gt; t.pc := i;
+              <span class="kw">false</span>
+
+  | <span class="dt">JumpMemLoc</span> loc -&gt; t.pc := mem.(loc);
+                      <span class="kw">false</span>                
+ 
+  | <span class="dt">Assign</span> (loc,i) -&gt; inc t.pc;
+                      mem.(loc) &lt;- i;
+                      <span class="kw">false</span>
+
+  | <span class="dt">PushToStack</span> loc -&gt; inc t.pc;
+                       t.stack.(!(t.sp)) &lt;- mem.(loc);
+                       inc t.sp;
+                       <span class="kw">false</span>
+
+  <span class="co">(* deref of the relative position relPos and assign to mem loc,</span>
+<span class="co">     to access top-most stack element set relPos=1,</span>
+<span class="co">     recall that sp refers to the next available position *)</span>                         
+  | <span class="dt">AssignFromStack</span> (relPos,loc) -&gt; inc t.pc;
+                                    mem.(loc) &lt;- t.stack.(!(t.sp) - relPos);
+                                    <span class="kw">false</span>
+
+  <span class="co">(* lock a memory cell, note that acess via assign doesn&#39;t check if cell is locked,</span>
+<span class="co">     hence, we assume that in case of shared memory, every access is protected by lock *)</span>                                      
+  | <span class="dt">Lock</span> loc -&gt; <span class="kw">if</span> memLock.(loc).locked
+                <span class="kw">then</span> <span class="kw">true</span>
+                <span class="kw">else</span> (memLock.(loc) &lt;- {locked = <span class="kw">true</span>; threadID = id};
+                      inc t.pc;
+                      <span class="kw">false</span>)
+
+  <span class="co">(* only the owner can unlock a memory cell, multiple unlock yield failure (true) *)</span>                       
+  | <span class="dt">Unlock</span> loc -&gt; <span class="kw">if</span> (not (memLock.(loc).locked &amp;&amp; memLock.(loc).threadID == id))
+                  <span class="kw">then</span> <span class="kw">true</span>
+                  <span class="kw">else</span> (memLock.(loc) &lt;- {locked = <span class="kw">false</span>; threadID = id};
+                      inc t.pc;
+                      <span class="kw">false</span>)
+                         
+  <span class="co">(* add new thread *)</span>
+  | <span class="dt">Thread</span> cs -&gt; <span class="kw">let</span> ts = !(st.threads) <span class="kw">in</span>
+                 st.threads := List<span class="kw">.</span>append ts [mkThread cs];
+                 <span class="kw">false</span>                  
+                         
+  | <span class="dt">PushE</span> i -&gt; t.env.(!(t.ep)) &lt;- i;
+               inc t.pc;
+               inc t.ep;
+               <span class="kw">false</span>
+
+  | <span class="dt">PopE</span> -&gt; inc t.pc;
+            dec t.ep;
+            <span class="kw">false</span>
+
+  | <span class="dt">PushToEnv</span> loc -&gt; inc t.pc;
+                     t.env.(!(t.ep)) &lt;- mem.(loc);
+                     inc t.ep;
+                     <span class="kw">false</span>
+
+  | <span class="dt">AssignFromEnv</span> (relPos,loc) -&gt; inc t.pc;
+                                  mem.(loc) &lt;- t.env.(!(t.ep) - relPos);
+                                  <span class="kw">false</span>
+
+  | <span class="dt">UpdateToEnv</span> (relPos,loc) -&gt; inc t.pc;
+                                t.env.(!(t.ep) - relPos) &lt;- mem.(loc);
+                                <span class="kw">false</span>                                          
+                       
+<span class="kw">let</span> debug txt = Printf<span class="kw">.</span>printf txt;
+                Printf<span class="kw">.</span>printf <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>
+                
+<span class="kw">let</span> run cs = <span class="kw">let</span> st = initState cs <span class="kw">in</span>
+             <span class="kw">let</span> stop = <span class="dt">ref</span> <span class="kw">false</span> <span class="kw">in</span>
+             <span class="kw">while</span> not !stop <span class="kw">do</span>
+                  stop := <span class="kw">true</span>;
+                  <span class="kw">for</span> i = <span class="dv">0</span> <span class="kw">to</span> List<span class="kw">.</span>length !(st.threads) - <span class="dv">1</span> <span class="kw">do</span> 
+                    <span class="kw">if</span> not (singleStep st i st.mem st.memLock (List<span class="kw">.</span>nth !(st.threads) i))
+                    <span class="kw">then</span> stop := <span class="kw">false</span>
+                  <span class="kw">done</span>;
+             <span class="kw">done</span>;
+             st
+                        
+<span class="kw">let</span> testProg1 = [<span class="dt">PushS</span> <span class="dv">1</span>; <span class="dt">PushS</span> <span class="dv">2</span>; <span class="dt">Add</span>; <span class="dt">Output</span>; <span class="dt">Halt</span>]
+
+<span class="kw">let</span> testProg2 = [<span class="dt">PushS</span> <span class="dv">1</span>; <span class="dt">PushS</span> <span class="dv">2</span>; <span class="dt">Lt</span>; <span class="dt">Output</span>; <span class="dt">Halt</span>]                  
+                          
+<span class="kw">let</span> getThread st i = (List<span class="kw">.</span>nth !(st.threads) i)</code></pre></div>
+</div>
+</body>
+</html>
