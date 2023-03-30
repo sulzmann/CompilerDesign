@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Martin Sulzmann" />
+  <title>OCaml Background</title>
+  <style type="text/css">
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="https://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">OCaml Background</h1>
+  <p class="author">
+Martin Sulzmann
+  </p>
+</div>
+<div id="background-on-ocaml" class="slide section level1">
+<h1>Background on OCaml</h1>
+<p>As said, we will use <a href="https://ocaml.org/">OCaml</a> in this
+course. <a href="https://ocaml.org/docs/install.html">Please install
+OCaml on your computer</a></p>
+<p>There are lots of online resources. Please let me know if you find
+something you consider useful and I will update these notes.</p>
+<p>If you have a background in functional programming, then the main
+issue is mainly a matter of getting used to the OCaml syntax.</p>
+<p>For those with an OO/Java background. The following might be helpful
+<a href="http://caml.inria.fr/pub/old_caml_site/FAQ/stephan.html">A
+C++/Java programmer’s introduction to Objective Caml</a></p>
+<p><a href="https://realworldocaml.org/">Real World OCaml</a></p>
+<p>Some background on:</p>
+<ul>
+<li><p><a
+href="http://caml.inria.fr/pub/docs/manual-ocaml/libref/String.html">strings
+in OCaml</a></p></li>
+<li><p><a
+href="http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual026.html">ocamllex
++ ocamlyacc</a></p></li>
+</ul>
+<h2 id="rough-tutorial-on-ocaml">Rough tutorial on OCaml</h2>
+<p><a href="http://xahlee.info/ocaml/ocaml_basics.html">See also
+here</a></p>
+<p>OCaml comes with an interpreter (<code>ocaml</code>) and a compiler
+(<code>ocamlc</code>). We will use here the interpreter.</p>
+<h3 id="toplevel-loop">Toplevel loop</h3>
+<pre><code>&gt; ocaml
+        OCaml version 4.02.3
+
+# 1 + 1 ;;
+- : int = 2
+# print_string &quot;Hello \n&quot;;;
+Hello 
+- : unit = ()
+# #quit;;</code></pre>
+<p>Can be put into a file.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* basics.ml *)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> + <span class="dv">1</span> ;;  </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">print_string</span> <span class="st">&quot;Hello&quot;</span>;;</span></code></pre></div>
+<p>Then load into toplevel loop.</p>
+<pre><code>&gt; ocaml
+        OCaml version 4.02.3
+
+# #use &quot;basics.ml&quot;;;
+- : int = 2
+Hello- : unit = ()</code></pre>
+<h3 id="functions">Functions</h3>
+<ul>
+<li><p>Functional style.</p></li>
+<li><p>Defining behavior by pattern matching over the input. Here
+integer values and tuples.</p></li>
+<li><p>Higher-order functions.</p></li>
+<li><p>Partial function applications.</p></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* functions.ml *)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="dt">succ</span> x = x + <span class="dv">1</span>;;</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> apply f x = f x;;</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> inc x = apply <span class="dt">succ</span> x;;</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> fac n = <span class="kw">if</span> n &lt;= <span class="dv">1</span> <span class="kw">then</span> <span class="dv">1</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>                <span class="kw">else</span> n * fac (n<span class="dv">-1</span>);;</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">(* pattern matching over input arguments *)</span>  </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> fac2 n = <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  | <span class="dv">1</span> -&gt; <span class="dv">1</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  | m -&gt; m * fac2 (m<span class="dv">-1</span>) ;;</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sum n = <span class="kw">match</span> n <span class="kw">with</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  | <span class="dv">0</span> -&gt; <span class="dv">0</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  | n -&gt; n + sum (n<span class="dv">-1</span>);;</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> plus x y = x + y;;</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> plus2 x = <span class="kw">fun</span> y -&gt; x + y;;</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">(* partial function application *)</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> inc2 = plus <span class="dv">1</span>;;</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a><span class="co">(* tuples *)</span>  </span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> plus3 (x,y) = x + y;;  </span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> curry f = <span class="kw">fun</span> x -&gt; <span class="kw">fun</span> y -&gt; f (x,y);;</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> uncurry f = <span class="kw">fun</span> (x,y) -&gt; f x y;;  </span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a><span class="co">(*  corresponds to </span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a><span class="co">let uncurry f = fun z -&gt; match z with</span></span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a><span class="co">                          | (x,y) -&gt; f x y;;</span></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="co"> *)</span></span></code></pre></div>
+<p>Example run.</p>
+<pre><code>        OCaml version 4.02.3
+
+# #use &quot;functions.ml&quot;;;
+val succ : int -&gt; int = &lt;fun&gt;
+val apply : (&#39;a -&gt; &#39;b) -&gt; &#39;a -&gt; &#39;b = &lt;fun&gt;
+val inc : int -&gt; int = &lt;fun&gt;
+val fac : int -&gt; int = &lt;fun&gt;
+val fac2 : int -&gt; int = &lt;fun&gt;
+val sum : int -&gt; int = &lt;fun&gt;
+val plus : int -&gt; int -&gt; int = &lt;fun&gt;
+val plus2 : int -&gt; int -&gt; int = &lt;fun&gt;
+val inc2 : int -&gt; int = &lt;fun&gt;
+val plus3 : int * int -&gt; int = &lt;fun&gt;
+val curry : (&#39;a * &#39;b -&gt; &#39;c) -&gt; &#39;a -&gt; &#39;b -&gt; &#39;c = &lt;fun&gt;
+val uncurry : (&#39;a -&gt; &#39;b -&gt; &#39;c) -&gt; &#39;a * &#39;b -&gt; &#39;c = &lt;fun&gt;
+# uncurry plus;;
+- : int * int -&gt; int = &lt;fun&gt;
+# (curry plus3) 1;;
+- : int -&gt; int = &lt;fun&gt;</code></pre>
+<p>Aside.</p>
+<p>Functions in Haskell.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plus x y <span class="ot">=</span> x <span class="op">+</span> y</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>plus2 x <span class="ot">=</span>  \ y <span class="ot">-&gt;</span> x <span class="op">+</span> y</span></code></pre></div>
+<p>Functions in the Go programming language.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode go"><code class="sourceCode go"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> plus<span class="op">(</span>x <span class="dt">int</span><span class="op">,</span> y <span class="dt">int</span><span class="op">)</span> <span class="dt">int</span> <span class="op">{</span> <span class="cf">return</span> x <span class="op">+</span> y <span class="op">}</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">func</span> plus2<span class="op">(</span>x <span class="dt">int</span><span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">func</span><span class="op">(</span>y <span class="dt">int</span><span class="op">)</span> <span class="dt">int</span> <span class="op">{</span> <span class="cf">return</span> x <span class="op">+</span> y <span class="op">}</span> <span class="op">}</span></span></code></pre></div>
+<h3 id="data-types">Data types</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* datatypes.ml *)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">(* mutable arrays *)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> boolArr = [| <span class="kw">true</span>; <span class="kw">false</span>; <span class="kw">true</span> |]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> runArr = boolArr.(<span class="dv">1</span>) &lt;- boolArr.(<span class="dv">2</span>);</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>             <span class="kw">for</span> i = <span class="dv">0</span> <span class="kw">to</span> <span class="dv">2</span> <span class="kw">do</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>               <span class="dt">Printf</span>.printf <span class="st">&quot;%b &quot;</span> boolArr.(i);</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>             <span class="kw">done</span>;</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>             <span class="dt">print_newline</span>()</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">(* records *)</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> point = { x : <span class="dt">int</span>; y : <span class="dt">int</span> }</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> pt = { x = <span class="dv">1</span>; y = <span class="dv">3</span> }</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> scale s p = { x = s * p.x; y = s * p.y }</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>               </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> pointX p = <span class="kw">match</span> p <span class="kw">with</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>                 | { x = x1 } -&gt; x1</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="co">(* lists *)</span>                                   </span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> l = [<span class="dv">1</span> ; <span class="dv">2</span> ; <span class="dv">3</span> ; <span class="dv">4</span>]</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> sum ls = <span class="kw">match</span> ls <span class="kw">with</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>                   | [] -&gt; <span class="dv">0</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                   | x :: xs -&gt; x + sum xs</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="co">(* sum/variant types will be discussed later*)</span>                                   </span></code></pre></div>
+<h3 id="imperative-style-of-programming">Imperative style of
+programming</h3>
+<ul>
+<li><p>Looping constructs: for and while.</p></li>
+<li><p>Reference variables.</p>
+<ul>
+<li><p>Declaration: `i = ref 1’</p></li>
+<li><p>Access: `!i’</p></li>
+<li><p>Update: `i:= …’</p></li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* imperative.ml *)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> printN n = <span class="kw">for</span> i=<span class="dv">1</span> <span class="kw">to</span> n <span class="kw">do</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                 <span class="dt">print_int</span> i;</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                 <span class="dt">print_string</span> <span class="st">&quot; &quot;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>               <span class="kw">done</span>;</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>               <span class="dt">print_newline</span>()</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                            </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> print2N n = <span class="kw">let</span> i = <span class="dt">ref</span> <span class="dv">1</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>                <span class="kw">in</span> <span class="kw">while</span> !i &lt;= n <span class="kw">do</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>                     <span class="dt">print_int</span> !i;</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>                     <span class="dt">print_string</span> <span class="st">&quot; &quot;</span>;</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>                     i := !i + <span class="dv">1</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                   <span class="kw">done</span>;</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>                   <span class="dt">print_newline</span>()                              </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>                              </span></code></pre></div>
+<h3 id="typing-of-programs">Typing of programs</h3>
+<ul>
+<li><p>Implicit versus explicit typing.</p></li>
+<li><p>Parametric polymorphism.</p></li>
+</ul>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* types.ml *)</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">(* implicit typing *)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> inc x = x + <span class="dv">1</span>;;</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> inc2 (x : <span class="dt">int</span>) : <span class="dt">int</span> = x + <span class="dv">1</span>;;</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="dt">fst</span> (x,y) = x;;</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co">(* type signature/annotation in separate .mli file  *)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> apply f x = f x;;  </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">(* parametric polymorphism *)</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> id (x : &#39;a) : &#39;a = x ;;</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="dt">snd</span> ((x,y) : (&#39;a * &#39;b)) : &#39;b = y;;  </span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co">(* will not work</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co">   let snd2 (x : &#39;a, y : &#39;b) : &#39;b = y;; </span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="co"> *)</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> main = <span class="dt">print_int</span> (apply id <span class="dv">1</span>);;  </span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* types.mli *)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> inc : <span class="dt">int</span> -&gt; <span class="dt">int</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> apply : (&#39;a -&gt; &#39;b) -&gt; &#39;a -&gt; &#39;b</span></code></pre></div>
+<p>Run this.</p>
+<pre><code>&gt; ocamlc -c types.mli
+&gt; ocamlopt -o types types.ml
+&gt; ./types
+&gt; 1</code></pre>
+<p>Aside.</p>
+<p>Haskell supports a powerful overloading mechanism via type classes.
+Thus, it is easy to overload the `print’ function.</p>
+<p>In OCaml this can be mimiced with its fancy module system
+(somehow).</p>
+</div>
+</body>
+</html>

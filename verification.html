@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Martin Sulzmann" />
+  <title>Static and Dynamic Verification</title>
+  <style type="text/css">
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="https://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Static and Dynamic Verification</h1>
+  <p class="author">
+Martin Sulzmann
+  </p>
+</div>
+<div id="static-versus-dynamic-verification"
+class="slide section level1">
+<h1>Static versus dynamic verification</h1>
+<h2 id="dynamic-verification">Dynamic verification</h2>
+<ul>
+<li><p>At run-time, execute the program.</p></li>
+<li><p>Observe its (actual) behavior.</p></li>
+<li><p>Also commonly referred to as run-time verification and
+testing.</p></li>
+</ul>
+<h2 id="static-verification">Static verification</h2>
+<ul>
+<li><p>Without actually executing the program.</p></li>
+<li><p>Sound approximation of the program’s behaviour</p></li>
+<li><p>Verify that the approximation satisfies some properties.</p></li>
+</ul>
+<h2 id="selection-of-verification-methods">Selection of verification
+methods</h2>
+<h3 id="static-program-analysis">Static program analysis</h3>
+<ol style="list-style-type: decimal">
+<li><p>Data-flow analysis</p></li>
+<li><p>Control-flow analysis</p></li>
+<li><p>Type and effect systems</p></li>
+<li><p>Modelchecking</p></li>
+</ol>
+<h3 id="dynamic-program-analysis">Dynamic program analysis</h3>
+<ol style="list-style-type: decimal">
+<li><p>Testing:</p>
+<ul>
+<li><p>Unit-Tests</p></li>
+<li><p>Invariants</p></li>
+<li><p>Oracel-based testing</p></li>
+</ul></li>
+<li><p>Run-time verification:</p>
+<ul>
+<li><p>Monitor run-time behavior</p></li>
+<li><p>Check for invalid patterns of behavior</p></li>
+</ul></li>
+</ol>
+<p>This is just a selection</p>
+</div>
+<div id="trace-based-runtime-verification-rv"
+class="slide section level1">
+<h1>Trace-Based Runtime Verification (RV)</h1>
+<p>Special instance where we are interested in the sequence of events
+(=trace) emitted by a program.</p>
+<p><em>Monitoring of the runtime behavior of programs to ensure that a
+given correctness property is satisfied.</em></p>
+<ol style="list-style-type: decimal">
+<li><p>Instrumention of a program to monitor the runtime behavior we are
+interested in.</p></li>
+<li><p>Recording of runtime behavior as a sequence of events (= program
+trace).</p></li>
+<li><p>Checking that the program trace satisfies the correctness
+property (= trace validation).</p></li>
+</ol>
+<h2 id="difference-to-modelchecking-mc">Difference to Modelchecking
+(MC)</h2>
+<ul>
+<li><p>MC considers <em>all</em> possible program runs. In RV we
+consider a <em>single</em> program run.</p></li>
+<li><p>MC operates on <em>infinite</em> traces whereas RV is restricted
+to <em>finite</em> traces.</p></li>
+</ul>
+<p>For example, consider the UPPAAL modelchecker and the examples from
+the Autonomous Systems course. A typical MC example is to guarantee that
+the user eventually obtains a coffee.</p>
+<p>In RV we can only check <em>safety</em> properties (“something bad
+will never happen”) whereas MC typically can also deal with
+<em>liveness</em> properties (“something good will eventually
+happen”).</p>
+</div>
+<div id="rv-topics" class="slide section level1">
+<h1>RV Topics</h1>
+<ul>
+<li><p>Program instrumentation:</p>
+<ul>
+<li><p><b>Efficiency</b>. As little overhead as possible (time and
+space). Also important to monitor the ‘true’ runtime behavior of
+programs (e.g. consider concurrent programs).</p></li>
+<li><p>Either <b>online</b> or <b>offline</b> (store trace in a log file
+for example).</p></li>
+<li><p><b>Compiler</b> extension versus <b>domain-specific
+embedding</b>.</p></li>
+</ul></li>
+<li><p>Trace validation:</p>
+<ul>
+<li><p><b>Pattern formalisms</b> to specify correctness (safety)
+properties, e.g. regular expressions, LTL, …</p></li>
+<li><p><b>Efficient algorithms</b> to implement pattern formalisms which
+work under the offline as well as online monitoring assumption.</p></li>
+<li><p><b>Explanation of results</b> (beyond yes/no answers).</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="trace-validation-with-regular-expressions"
+class="slide section level1">
+<h1>Trace Validation with Regular Expressions</h1>
+<p>Check that the trace matches the specification. This is also referred
+to as trace validation. Here, we consider a specific formalism to
+specify valid traces.</p>
+<h2 id="regular-expressions">Regular Expressions</h2>
+<p>In EBNF Syntax:</p>
+<pre><code>
+R ::= x | y | z | ...           Symbols aka letters taken from a finite alphabet
+    |  epsilon                  Empty word
+    |  phi                      Empty language
+    |  R + R                    Alternatives
+    |  R . R                    Sequence aka concatenation
+    |  R*                       Kleene star</code></pre>
+<p>Popular formalism to specify (infinitely many) patterns of input.</p>
+<p>For example,</p>
+<pre><code> (open . (read + write)* . close)*</code></pre>
+<p>specifies the valid access patterns of a resource usage policy.</p>
+<p>We assume that <code>open</code>, <code>read</code>,
+<code>write</code>, <code>close</code> are the primitive events
+(symbols) which will be recorded during a program run.</p>
+<h2 id="run-time-monitor">Run-Time Monitor</h2>
+<p>The classical approach is to turn the regular expression into an
+automata (for example via the Thompson NFA construction). Then, we can
+run the trace on the automata.</p>
+<p>Below, we will consider an alternative method and discuss its
+advantages.</p>
+<h2 id="derivatives">Derivatives</h2>
+<p>Brzozowski <a
+href="">https://en.wikipedia.org/wiki/Brzozowski_derivative</a>
+introduced a symbolic method to construct an automata from a regular
+expression based on the concept of derivatives.</p>
+<p>Given some expression R and a symbol x, we obtain the
+<em>derivative</em> of R w.r.t. x, written d(R,x), by taking way the
+leading symbol x from R.</p>
+<p>In semantic terms, d(R,x) can be described as follows:</p>
+<pre><code>L(d(R,x)) = x \ L(R)</code></pre>
+<ul>
+<li><p>L(R) computes the language denoted by a regular
+expression</p></li>
+<li><p>x  L(R) denotes the left quotient, i.e. the language
+<code>{ w | x . w in L(r)}</code>.</p>
+<ul>
+<li>We write <code>.</code> to denote concatenation. In some exposition
+this is left silent, i.e. <code>x w</code>.</li>
+</ul></li>
+<li><p>Hence, the derivative <code>d(R,x)</code> denotes the set of all
+words from L(R) where the leading symbol x has been removed.</p></li>
+</ul>
+<p>Thus, it is easy to solve the word problem. Let <code>w</code> be a
+word consisting of symbols <code>x1 . x2 .... xn-1 . xn</code>.</p>
+<p>Compute</p>
+<pre><code>d(R,x1) = R1
+d(R1,x2) = R2
+...
+d(Rn-1,xn) = Rn</code></pre>
+<p>That is, we repeatidely build the derivative of R w.r.t symbols
+xi.</p>
+<p>Check if the final expression <code>Rn</code> is nullable. An
+expression S is <em>nullable</em> if epsilon in L(S).</p>
+<p>The derivative operation <code>d(R,x)</code> as well as the
+nullability test <code>n(R)</code> can be computed by some simple
+recursion over the structure of R.</p>
+<p>Here is a complete implementation in Haskell.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ot">{-# LANGUAGE GADTs #-}</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">R</span> <span class="ot">=</span> <span class="dt">Letter</span> <span class="dt">Char</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Eps</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Phi</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Alt</span> (<span class="dt">R</span>,<span class="dt">R</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Seq</span> (<span class="dt">R</span>,<span class="dt">R</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Kleene</span> <span class="dt">R</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">-- Check if an expression R is nullable, i.e. if eps in L(R) </span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="ot">n ::</span> <span class="dt">R</span> <span class="ot">-&gt;</span> <span class="dt">Bool</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>n <span class="dt">Letter</span>{}     <span class="ot">=</span> <span class="dt">False</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>n <span class="dt">Eps</span>          <span class="ot">=</span> <span class="dt">True</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>n <span class="dt">Phi</span>          <span class="ot">=</span> <span class="dt">False</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>n (<span class="dt">Alt</span> (r,s))  <span class="ot">=</span> n(r) <span class="op">||</span> n(s)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>n (<span class="dt">Seq</span> (r,s))  <span class="ot">=</span> n(r) <span class="op">&amp;&amp;</span> n(s)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>n <span class="dt">Kleene</span>{}     <span class="ot">=</span> <span class="dt">True</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">-- Build the derivative of R w.r.t. x</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="ot">d ::</span> (<span class="dt">R</span>, <span class="dt">Char</span>) <span class="ot">-&gt;</span> <span class="dt">R</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Letter</span> x, y)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>   <span class="op">|</span> x <span class="op">==</span> y       <span class="ot">=</span> <span class="dt">Eps</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>   <span class="op">|</span> <span class="fu">otherwise</span>    <span class="ot">=</span> <span class="dt">Phi</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Eps</span>, _)        <span class="ot">=</span> <span class="dt">Phi</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Phi</span>, _)        <span class="ot">=</span> <span class="dt">Phi</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Alt</span> (r,s), x)  <span class="ot">=</span> <span class="dt">Alt</span> (d(r,x), d(s,x))</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Seq</span> (r, s), x)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>   <span class="op">|</span> n r          <span class="ot">=</span> <span class="dt">Alt</span> (<span class="dt">Seq</span> (d(r,x), s), d(s,x))</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>   <span class="op">|</span> <span class="fu">otherwise</span>    <span class="ot">=</span> <span class="dt">Seq</span> (d(r,x), s)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Kleene</span> r, x)   <span class="ot">=</span> <span class="dt">Seq</span> (d(r,x), <span class="dt">Kleene</span> r)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a><span class="co">-- Check if the expression matches some word</span></span></code></pre></div>
+<p>It is really that simple!</p>
+<p>Here’s a sketch of an OO-based implementation making use of
+inheritance and virtual methods.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">abstract</span> <span class="kw">class</span> RE <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">n</span><span class="op">()</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">d</span><span class="op">(</span><span class="dt">char</span><span class="op">)</span> RE<span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Phi <span class="op">:</span> RE <span class="op">{</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Phi</span><span class="op">()</span> <span class="op">{}</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">d</span><span class="op">(</span><span class="dt">char</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="fu">Phi</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>    </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Eps <span class="op">:</span> RE <span class="op">{</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Eps</span><span class="op">()</span> <span class="op">{}</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">d</span><span class="op">(</span><span class="dt">char</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="fu">Phi</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>    </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Alt <span class="op">:</span> RE <span class="op">{</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    RE left<span class="op">,</span> right<span class="op">;</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Alt</span> <span class="op">(</span>RE x<span class="op">,</span> RE y<span class="op">)</span> <span class="op">{</span> left <span class="op">=</span> x<span class="op">;</span> right <span class="op">=</span> y<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> left<span class="op">.</span><span class="fu">n</span><span class="op">()</span> <span class="op">||</span> right<span class="op">.</span><span class="fu">n</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">d</span><span class="op">(</span><span class="dt">char</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="fu">Alt</span><span class="op">(</span><span class="fu">d</span><span class="op">(</span>left<span class="op">,</span>x<span class="op">),</span> <span class="fu">d</span><span class="op">(</span>right<span class="op">,</span>x<span class="op">));</span> <span class="op">}</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Seq <span class="op">:</span> RE <span class="op">{</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    RE left<span class="op">,</span> right<span class="op">;</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Seq</span> <span class="op">(</span>RE x<span class="op">,</span> RE y<span class="op">)</span> <span class="op">{</span> left <span class="op">=</span> x<span class="op">;</span> right <span class="op">=</span> y<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> left<span class="op">.</span><span class="fu">n</span><span class="op">()</span> <span class="op">&amp;&amp;</span> right<span class="op">.</span><span class="fu">n</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">d</span><span class="op">(</span><span class="dt">char</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>left<span class="op">.</span><span class="fu">n</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>           <span class="cf">return</span> <span class="fu">Alt</span><span class="op">(</span><span class="fu">Seq</span> <span class="op">(</span><span class="fu">d</span><span class="op">(</span>left<span class="op">,</span>x<span class="op">),</span> right<span class="op">),</span> <span class="fu">d</span><span class="op">(</span>right<span class="op">,</span>x<span class="op">));</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>       <span class="cf">return</span> <span class="fu">Seq</span> <span class="op">(</span><span class="fu">d</span><span class="op">(</span>left<span class="op">,</span>x<span class="op">),</span> right<span class="op">);</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span>   </span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="properties">Properties</h2>
+<p>Let Sigma be the alphabet. Then, the following properties hold.</p>
+<ul>
+<li>Left quotients.</li>
+</ul>
+<pre><code>L(d(R,x)) = x \ L(R) for any x in Sigma</code></pre>
+<ul>
+<li>Representation</li>
+</ul>
+<pre><code>Sigma = { x1, ..., xn }
+L(r) = L(x1 . d(r,x1)) cup ... cup L(xn . d(r,xn))
+       cup if n(r) then {eps} else {}</code></pre>
+<p>In general, the size of the derivatives and its descendants explodes.
+However, if we impose the following laws we can guarantee that for each
+expression the set of derivatives and its descendants is finite.</p>
+<pre><code>(Idempotence)   r + r = r
+
+(Commutativity) r + s = s + r
+
+(Associativity) r + (s + t) = (r + s) + t</code></pre>
+<p>An attractive feature of trace validation via derivatives is that
+there is no need to build an explicit automata out of an expression. In
+essence, the automata is constructed on-the-fly where</p>
+<ul>
+<li><p>states are represented by derivatives, and</p></li>
+<li><p>transition execution from a state to another state corresponds to
+building the derivative.</p></li>
+</ul>
+</div>
+<div id="linear-temporal-logic" class="slide section level1">
+<h1>Linear Temporal Logic</h1>
+<p>There are heaps of formalisms to specify the valid trace patterns.
+Another popular formalism is <b>linear temporal logic (LTL)</b> <a
+href="">https://en.wikipedia.org/wiki/Linear_temporal_logic</a>. LTL
+shares similarities to CTL, recall the UPPAAL model checker. While CTL
+makes statements about states, LTL makes statements about program
+traces. Here is the syntax of propositional LTL where we assume that
+primitives are propositional statements about elements (aka events) in
+the trace.</p>
+<pre><code>L ::= x | y | z | ...      Events taken from a finite alphabet
+    |  L and L
+    |  L or L
+    |  not L
+    |  next L
+    |  always L
+    |  eventually L 
+    |  L until L</code></pre>
+<p>The <code>always</code> operator is written as a “box” and
+<code>eventually</code> as a “diamond” in expositions which use math
+instead of ascii notation.</p>
+<p>Commonly, the semantics of LTL is explained in terms of infinite
+traces. One of the application of LTL is for model checking purposes
+where we for example wish to investigate liveness properties of
+non-terminating systems. Here, we consider LTL in the RV setting. Below
+is a possible finite trace semantics of LTL.</p>
+<h2 id="finite-trace-semantics-based-on-derivatives">Finite Trace
+Semantics based on Derivatives</h2>
+<p>Build the LTL expression that resultings from taking away the leading
+event.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ot">{-# LANGUAGE GADTs #-}</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">L</span> <span class="ot">=</span> <span class="dt">Prim</span> <span class="dt">Char</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Or</span> <span class="dt">L</span> <span class="dt">L</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">And</span> <span class="dt">L</span> <span class="dt">L</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Not</span> <span class="dt">L</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">TTrue</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">FFalse</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Always</span> <span class="dt">L</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Eventually</span> <span class="dt">L</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Next</span> <span class="dt">L</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>       <span class="op">|</span> <span class="dt">Until</span> <span class="dt">L</span> <span class="dt">L</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co">-- Build the derivative of L w.r.t. x</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="ot">d ::</span> <span class="dt">L</span> <span class="ot">-&gt;</span> <span class="dt">Char</span> <span class="ot">-&gt;</span> <span class="dt">L</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Prim</span> x) y</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>   <span class="op">|</span> x <span class="op">==</span> y          <span class="ot">=</span> <span class="dt">TTrue</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>   <span class="op">|</span> <span class="fu">otherwise</span>       <span class="ot">=</span> <span class="dt">FFalse</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Or</span> l1 l2) x       <span class="ot">=</span> d l1 x <span class="ot">`Or`</span> d l2 x</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">And</span> l1 l2) x      <span class="ot">=</span> d l1 x <span class="ot">`And`</span> d l2 x</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Not</span> l) x          <span class="ot">=</span> <span class="dt">Not</span> (d l x)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>d <span class="dt">TTrue</span> _            <span class="ot">=</span> <span class="dt">TTrue</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>d <span class="dt">FFalse</span> _           <span class="ot">=</span> <span class="dt">FFalse</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Always</span> l) x       <span class="ot">=</span> d l x <span class="ot">`And`</span> (<span class="dt">Always</span> l)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Eventually</span> l) x   <span class="ot">=</span> d l x <span class="ot">`Or`</span> (<span class="dt">Eventually</span> l)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>d (<span class="dt">Until</span> l1 l2) x    <span class="ot">=</span> d l2 x <span class="ot">`Or`</span> (d l1 x <span class="ot">`Or`</span> (l1 <span class="ot">`Until`</span> l2))  </span></code></pre></div>
+<p>What about the truth value of LTL expressions?</p>
+<p>We need to distinguish among three cases:</p>
+<ul>
+<li><p>Definitely true.</p></li>
+<li><p>Definitely false.</p></li>
+<li><p>We do not know yet.</p></li>
+</ul>
+<p>Consider the following examples.</p>
+<ul>
+<li><p><code>next x</code> is definitely true for trace
+<code>y x</code>.</p></li>
+<li><p><code>always x</code> is definitely false for trace
+<code>x y</code>.</p></li>
+<li><p>For <code>eventually x</code> and trace <code>y y</code> we do
+not know.</p>
+<ul>
+<li>Possible that <code>x</code> eventually appears!</li>
+</ul></li>
+</ul>
+</div>
+<div id="trace-validation-dicussion" class="slide section level1">
+<h1>Trace Validation Dicussion</h1>
+<ul>
+<li><p><b>Efficient synthesis methods</b>, i.e. how to make the
+specification executable.</p></li>
+<li><p><b>Specification coverage</b></p></li>
+</ul>
+<p>Constructive Finite Trace Analysis with Linear Temporal Logic:</p>
+<p><a
+href="">http://www.home.hs-karlsruhe.de/~suma0002/publications/tap12-constructive-ltl.pdf</a></p>
+<ul>
+<li><b>Failure diagnosis</b>, e.g. pinpointing the source of matching
+failure.</li>
+</ul>
+<p>Constructive Trace Validation with Flat Temporal Logic Patterns:</p>
+<p><a
+href="">http://www.home.hs-karlsruhe.de/~suma0002/SEQLTL/constructive-trace-validation.pdf</a></p>
+<ul>
+<li><b>Fixing specifications</b>, the reason for matching failure may be
+due to a ‘wrong’ specification.</li>
+</ul>
+<p>Fixing Regular Expression Matching Failure:</p>
+<p><a
+href="">http://www.home.hs-karlsruhe.de/~suma0002/publications/fixing-reg-exp.pdf</a></p>
+<ul>
+<li><b>Ambiguous specifications</b></li>
+</ul>
+<p>Derivative-Based Diagnosis of Regular Expression Ambiguity</p>
+<p><a
+href="">http://www.home.hs-karlsruhe.de/~suma0002/publications/DerivativesDiagnosisRegExAmbiguity.pdf</a></p>
+</div>
+<div id="rv-projects" class="slide section level1">
+<h1>RV Projects</h1>
+<p>Goals + Approach:</p>
+<ul>
+<li><p>Select one of the projects (one project per student).</p></li>
+<li><p>Summarize your findings.</p>
+<ul>
+<li><p>No specific format.</p></li>
+<li><p>Best in written form.</p></li>
+</ul></li>
+<li><p>Make cross connections to the RV material discussed in
+class.</p></li>
+<li><p><b>There is no need to cover all</b></p>
+<ul>
+<li>Focus on the bits you find interesting.</li>
+</ul></li>
+</ul>
+<h2 id="efficient-trace-monitoring-tracematches">Efficient Trace
+Monitoring (Tracematches)</h2>
+<h3 id="resourcesliterature">Resources/Literature</h3>
+<p><a
+href="">http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=4ACCA91ACB2E8E324B7DE0F81663332C?doi=10.1.1.60.4681&amp;rep=rep1&amp;type=pdf</a></p>
+<p><a
+href="">http://cormack.uwaterloo.ca/~olhotak/pubs/oopsla06poster.pdf</a></p>
+<h3 id="notes">Notes</h3>
+<ul>
+<li><p>Considers a variant of regular expression with free
+variables.</p></li>
+<li><p>For example, consider the expression
+<code>read(f) . close(f)</code> where <code>f</code> is the free
+variable.</p></li>
+<li><p>During trace validation/matching the variable will be bound to
+some concrete variable.</p></li>
+<li><p>Notice that there are multiple occurences of free variable
+<code>f</code>.</p></li>
+<li><p>In terms of expressive power, such expressions are no longer
+regular.</p></li>
+<li><p>Such extension of regular expressions are also known as
+expressions with <em>back references</em>.</p></li>
+</ul>
+<h2 id="temporal-assertions-using-aspectj">Temporal Assertions using
+AspectJ</h2>
+<h3 id="resourcesliterature-1">Resources/Literature</h3>
+<p><a
+href="">http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.60.3062&amp;rep=rep1&amp;type=pdf</a></p>
+<h3 id="notes-1">Notes</h3>
+<p>Abstract:</p>
+<p>We present a runtime verification framework for Java programs.
+Properties can be specified in Linear-time Temporal Logic (LTL) over
+AspectJ pointcuts. These properties are checked during program-execution
+by an automaton-based approach where transitions are triggered through
+aspects. No Java source code is necessary since AspectJ works on the
+bytecode level, thus even allowing instrumentation of third-party
+applications. As an example, we discuss safety properties and lock-order
+reversal.</p>
+<h2 id="rule-based-runtime-verification">Rule-Based Runtime
+Verification</h2>
+<h3 id="resourcesliterature-2">Resources/Literature</h3>
+<p><a href="">http://www.havelund.com/Publications/eagle.pdf</a></p>
+<h3 id="notes-2">Notes</h3>
+<p>Abstract:</p>
+<p>We present a rule-based framework for defining and implementing
+finite trace monitoring logics, including future and past time temporal
+logic, ex- tended regular expressions, real-time logics, interval
+logics, forms of quantified temporal logics, and so on. Our logic, EAGLE
+, is implemented as a Java library and involves novel techniques for
+rule definition, manipulation and execution. Monitoring is done on a
+state-by-state basis, without storing the execution trace.</p>
+<h2
+id="an-entry-point-for-formal-methods-specification-and-analysis-of-event-logs">An
+Entry Point for Formal Methods: Specification and Analysis of Event
+Logs</h2>
+<h3 id="resourcesliterature-3">Resources/Literature</h3>
+<p><a href="">http://arxiv.org/pdf/1003.1682.pdf</a></p>
+<h3 id="notes-3">Notes</h3>
+<p>Abstract:</p>
+<p>Formal specification languages have long languished, due to the grave
+scalability problems faced by complete verification methods. Runtime
+verification promises to use formal specifications to auto- mate part of
+the more scalable art of testing, but has not been widely applied to
+real systems, and often falters due to the cost and complexity of
+instrumentation for online monitoring. In this paper we discuss work in
+progress to apply an event-based specification system to the logging
+mechanism of the Mars Science Laboratory mission at JPL. By focusing on
+log analysis, we exploit the “instrumen- tation” already implemented and
+required for communicating with the spacecraft. We argue that this work
+both shows a practical method for using formal specifications in testing
+and opens interesting research avenues, including a challenging
+specification learning problem.</p>
+<h2 id="tracecontract-a-scala-dsl-for-trace-analysis">TraceContract : A
+Scala DSL for Trace Analysis</h2>
+<h3 id="resourcesliterature-4">Resources/Literature</h3>
+<p><a
+href="">http://havelund.com/Publications/tracecontract-fm-2011.pdf</a></p>
+<h2
+id="property-specification-patterns-for-finite-state-verification">Property
+Specification Patterns for Finite-state Verification</h2>
+<h3 id="resourcesliterature-5">Resources/Literature</h3>
+<p><a
+href="">http://ext.math.umass.edu/~avrunin/papers/dwyer98-fmsp-patterns.pdf</a></p>
+<p><a
+href="">http://patterns.projects.cis.ksu.edu/documentation/patterns/ltl.shtml</a></p>
+<h3 id="notes-4">Notes</h3>
+<ul>
+<li><p>LTL and related formalisms such as regular expressions are too
+low-level and complicated get complicated and hard to maintain.</p></li>
+<li><p>Idea is to idenfiy typical patterns and provide general
+recipes.</p></li>
+<li><p>Here is an example</p></li>
+</ul>
+<pre><code>InBetween(W,F,R) = (W and (eventually R) =&gt; (not R) until F</code></pre>
+<p><code>=&gt;</code> denotes Boolean implication.</p>
+</div>
+</body>
+</html>

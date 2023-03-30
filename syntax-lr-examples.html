@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Martin Sulzmann" />
+  <title>LR Parsing - Examples</title>
+  <style type="text/css">
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="https://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">LR Parsing - Examples</h1>
+  <p class="author">
+Martin Sulzmann
+  </p>
+</div>
+<div id="highlights" class="slide section level1">
+<h1>Highlights</h1>
+<ul>
+<li><p>Bottom-up parsing</p></li>
+<li><p>Scan input from left</p></li>
+<li><p>Recognize right-hand side of production rules</p></li>
+<li><p>Shift/reduce operations</p></li>
+</ul>
+</div>
+<div id="example-1---arithmetic-expressions"
+class="slide section level1">
+<h1>Example 1 - Arithmetic expressions</h1>
+<p>Let’s build the LR(0) item set for the following grammar.</p>
+<pre><code>S -&gt; E
+E -&gt; id
+E -&gt; (E)
+E -&gt; E+E
+E -&gt; E*E</code></pre>
+<p>We start with</p>
+<pre><code>I0 : { S -&gt; .E, E -&gt; .id, E -&gt; .(E), E -&gt; .E+E, E -&gt; .E*E }</code></pre>
+<p>Recall that the <code>.</code> indicates how much of a right-hand
+side we have already recognized. If the <code>.</code> hits a
+non-terminal, we pull in the respective rules for this non-terminal.</p>
+<p>We build item sets by checking which ‘symbols’ can be consumed. A
+symbol can either be a terminal or a non-terminal (symbol, here you go
+we overload the term symbol).</p>
+<p>Starting from <code>I0</code>, possible symbols to be consumed are:
+<code>id</code>, <code>(</code>, <code>E</code>. This results into the
+following three item sets.</p>
+<pre><code>consume id
+I1: { E -&gt; id. }
+
+consume (
+I2: { E -&gt; (.E), E -&gt; .id, E -&gt; .(E), E -&gt; .E+E, E -&gt; .E*E }
+
+consume E
+I3: { S -&gt; E., E -&gt; E.+E, E -&gt; E.*E }</code></pre>
+<p>Observations:</p>
+<ul>
+<li><p>We seem to have a shift/reduce conflict for I3:
+<code>S -&gt; E.</code> versus <code>E -&gt; E.+E</code>. However, we
+can resolve this conflict as the reduction <code>S -&gt; E.</code> only
+applies in case we hit the EOF symbol.</p></li>
+<li><p>The process of “shifting” the <code>.</code> across the
+right-hand side resembles the derivative operation we have seen in the
+context of regular expressions.</p></li>
+</ul>
+<p>Let’s continue to build the remaining item sets and transitions. We
+write <code>StartItem - symbol -&gt; NextItem</code> to indicate the
+resulting transitions of the FSA obtained by building item sets.</p>
+<pre><code>I0 - id -&gt; I1
+I0 - ( -&gt;  I2
+I0 - E -&gt;  I3
+
+
+I2 - id -&gt; I1
+I2 - ( -&gt; I2
+I2 - E -&gt; I4
+
+I3 - + -&gt; I5
+I3 - * -&gt; I6
+
+I4 - ) -&gt; I7
+I4 - + -&gt; I5
+I4 - * -&gt; I6
+
+I5 - id -&gt; I1
+I5 - (  -&gt; I2
+I5 - E  -&gt; I7
+
+I6 - id -&gt; I1
+I6 - (  -&gt; I2
+I6 - E  -&gt; I8
+
+I7 - +  -&gt; I5
+I7 - *  -&gt; I6
+
+I8 - +  -&gt; I5
+I8 - *  -&gt; I6
+
+
+I0 : { S -&gt; .E, E -&gt; .id, E -&gt; .(E), E -&gt; .E+E, E -&gt; .E*E }
+
+// I0 - id -&gt; I1
+I1: { E -&gt; id. }
+
+// I0 - ( -&gt; I2
+I2: { E -&gt; (.E), E -&gt; .id, E -&gt; .(E), E -&gt; .E+E, E -&gt; .E*E }
+
+// I0 - E -&gt; I3
+I3: { S -&gt; E., E -&gt; E.+E, E -&gt; E.*E }
+
+// I2 - E -&gt; I4
+I4 : { E -&gt; (E.), E -&gt; E.+E, E -&gt; E.*E }
+
+// I3 - + -&gt; I5
+I5 : { E -&gt; E+.E, E -&gt; .id, E -&gt; .(E), E -&gt; .E+E, E -&gt; .E*E }
+
+// I3 - * -&gt; I6
+I6 : { E -&gt; E*.E, E -&gt; .id, E -&gt; .(E), E -&gt; .E+E, E -&gt; .E*E }
+
+// I5 - E -&gt; I7
+I7: { E -&gt; E+E., E -&gt; E.+E, E -&gt; E.*E }
+
+// I6 - E -&gt; I8
+I8: { E -&gt; E*E., E -&gt; E.+E, E -&gt; E.*E }
+</code></pre>
+<p>Observations.</p>
+<ul>
+<li><p>We encounter shift/reduce conflicts in <code>I7</code> and
+<code>I8</code>.</p></li>
+<li><p>This is no surprise as we know that this grammar is
+unambiguous!</p></li>
+</ul>
+<p>How to resolve these conflicts?</p>
+<ol style="list-style-type: decimal">
+<li>Rewrite into an unambiguous grammar!</li>
+</ol>
+<pre><code>S -&gt; E
+E -&gt; T+E
+E -&gt; T
+T -&gt; F*T
+T -&gt; F
+F -&gt; id
+F -&gt; (E)</code></pre>
+<ul>
+<li><p><code>*</code> has precdence over <code>+</code></p></li>
+<li><p>Both operations are left-associative</p></li>
+</ul>
+<ol start="2" style="list-style-type: decimal">
+<li>Customize LR parser as follows:</li>
+</ol>
+<ul>
+<li><p>If we are in state 9 (item set <code>I7</code>) and lookahead is
+<code>+</code>, then reduce (left-associative). If lookahead is
+<code>*</code>, then shift (precedence).</p></li>
+<li><p>If we are in state 10 (item set <code>I8</code>) and lookahead is
+<code>*</code>, then reduce (left-associative). If lookahead is
+<code>+</code>, then reduce again (precedence).</p></li>
+</ul>
+<p>This special case can be deal with in <code>yacc</code> by specifying
+that <code>*</code> has a higher precedence than <code>+</code>.</p>
+</div>
+<div id="example-2---dangling-else" class="slide section level1">
+<h1>Example 2 - Dangling else</h1>
+<p>Recall</p>
+<pre><code>Stmt -&gt; if E then Stmt else Stmt
+Stmt -&gt; if E then Stmt
+Stmt -&gt; other</code></pre>
+<p>This grammar is ambiguous. For example, consider</p>
+<pre><code>if expr then if expr then other else other</code></pre>
+<p>Disambiguation: “Match closest then”.</p>
+<pre><code>Stmt -&gt; Match
+Stmt -&gt; Unmatch
+Stmt -&gt; other
+
+Match -&gt; if E then Match else Match
+Match -&gt; other
+
+Unmatch -&gt; if E then Stmt
+Unmatch -&gt; if E then Match else Unmatch</code></pre>
+<p>This grammar should be accepted by yacc, hence, belongs to the class
+LALR(1).</p>
+</div>
+</body>
+</html>

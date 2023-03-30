@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Martin Sulzmann" />
+  <title>Parser Combinators</title>
+  <style type="text/css">
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="https://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Parser Combinators</h1>
+  <p class="author">
+Martin Sulzmann
+  </p>
+</div>
+<div id="overview" class="slide section level1">
+<h1>Overview</h1>
+<p>There are lots of different parsing approaches.</p>
+<p>For example, see LL and LR parsing.</p>
+<p>Another popular approach are <a
+href="https://en.wikipedia.org/wiki/Parser_combinator">Parser
+combinators</a></p>
+<p>Main idea:</p>
+<ul>
+<li><p>Use combinators to build parsers.</p></li>
+<li><p>Combinators are <em>fancy</em> API functions which hide much of
+the plumbing necessary to carry out parsing.</p></li>
+<li><p>Often, a EBNF specification can be directly translated into some
+sequence of combinator calls.</p></li>
+<li><p>There exists lots of parser combinator libraries for most
+programming languages.</p></li>
+<li><p>Compared to parsing tools such as yacc and ANTLR, the parser is
+embedded into the host language. So, parser combinators form an
+<em>internal domaina-specific language (DSL)</em> (aka embedded DSL)
+whereas yacc and ANTLR are external DSLs.</p></li>
+</ul>
+<p>In the following, we give a (rather naive) encoding of a parser
+combinator library in OCaml.</p>
+<h2 id="what-is-a-parser">What is a parser?</h2>
+<p>A parser is a function which takes a string and yields a result and
+the remaining string.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> &#39;a <span class="kw">parser</span> = Parser <span class="kw">of</span> (<span class="dt">string</span> -&gt;  (<span class="dt">string</span> * &#39;a) <span class="dt">option</span>)</span></code></pre></div>
+<p>As parsing may fail, we use the (built-in) <code>option</code> type
+to report failure. Recall</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> &#39;a <span class="dt">option</span> = <span class="dt">None</span> | <span class="dt">Some</span> <span class="kw">of</span> &#39;a</span></code></pre></div>
+<p><code>Parser</code> is a type constructor which applied to a type
+yields a function type.</p>
+<p>We could have used plain function types but via <code>Parser</code>
+we easily identify functions which are connected to parsing.</p>
+<h2 id="helper-functions">Helper functions</h2>
+<p>We introduce some helper functions to run a parser and to extract the
+head and tail of a string.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> hd s = <span class="dt">String</span>.get s <span class="dv">0</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> tail s = <span class="dt">String</span>.sub s <span class="dv">1</span> ((<span class="dt">String</span>.length s) - <span class="dv">1</span>)                      </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> parse p s = <span class="kw">match</span> p <span class="kw">with</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                  Parser f -&gt; f s</span></code></pre></div>
+<h2 id="basic-combinators">Basic combinators</h2>
+<p>The epsilon combinator which parses the empty string. We leave the
+input string untouched and report as a result the empty string.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> eps = Parser (<span class="kw">fun</span> s -&gt; <span class="dt">Some</span> (s, <span class="st">&quot;&quot;</span>))</span></code></pre></div>
+<p>A parser to accept a specific character (item).</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> item x = Parser (<span class="kw">fun</span> s -&gt;  <span class="kw">match</span> s <span class="kw">with</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                               | <span class="st">&quot;&quot;</span> -&gt; <span class="dt">None</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                               | s  -&gt; <span class="kw">if</span> x == hd s</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>                                       <span class="kw">then</span> <span class="dt">Some</span> (tail s, x)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                                       <span class="kw">else</span> <span class="dt">None</span>)</span></code></pre></div>
+<h2 id="building-higher-order-combinators">Building higher-order
+combinators</h2>
+<p>Build a new parser by composition of an exisisting parser.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> alt p1 p2 = Parser (<span class="kw">fun</span> s -&gt; <span class="kw">match</span> (parse p1 s) <span class="kw">with</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                                   | <span class="dt">None</span> -&gt; parse p2 s</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                                   | <span class="dt">Some</span> r -&gt; <span class="dt">Some</span> r)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> seq p1 p2 = Parser (<span class="kw">fun</span> s -&gt; <span class="kw">match</span> (parse p1 s) <span class="kw">with</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                                 | <span class="dt">None</span> -&gt; <span class="dt">None</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                                 | <span class="dt">Some</span> (s2,x) -&gt; parse (p2 x) s2)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> conc p1 p2 = seq p1 (<span class="kw">fun</span> _ -&gt; p2)</span></code></pre></div>
+<p>Exercise: Let’s try to work out the types of the above functions.</p>
+<p><code>alt</code> is left-biased, if the first argument (parser)
+fails, we try the alternative.</p>
+<p><code>seq</code> runs two parsers in sequences. Recall that as a side
+product of parsing we usually expect to obtain a parse tree. With parser
+combinators the result obtained can be arbitrary. Check the type of
+<code>seq</code>!</p>
+<p><code>conc</code> is a specialized combinator where we simply
+concatenate the two parsers, ignoring the result obtained from the first
+parser.</p>
+<h2 id="some-simple-examples">Some simple examples</h2>
+<p>As we largely ignore here the result produced by parsing, we write a
+matcher function which checks if our parser matches some input
+string.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> matcher p s = <span class="kw">match</span> (parse p s) <span class="kw">with</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                   | <span class="dt">None</span> -&gt; <span class="kw">false</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                   | <span class="dt">Some</span> (r,_) -&gt; <span class="kw">match</span> r <span class="kw">with</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                                   | <span class="st">&quot;&quot;</span> -&gt; <span class="kw">true</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                                   | _  -&gt; <span class="kw">false</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                                   <span class="co">(* == not defined for strings *)</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                     </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> ex0 = item <span class="ch">&#39;c&#39;</span>                     </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> ex1 = alt (item <span class="ch">&#39;a&#39;</span>) (item <span class="ch">&#39;b&#39;</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> ex2 = conc ex0 ex1 </span></code></pre></div>
+<h2 id="more-expressive-parser-combinators">More expressive parser
+combinators</h2>
+<p>Most parser combinator libraries provide further combinators so we
+can even deal with left-recursive, ambiguous and even beyond
+context-free grammars. For details see here <a
+href="Parser%20combinators">https://en.wikipedia.org/wiki/Parser_combinator</a>.</p>
+<p>In fact, some of these more expressive combinators can be directly
+encoded in terms of the host language. In the following, we show how to
+encode Kleene star.</p>
+<p>Consider the regular expression</p>
+<pre><code>a*</code></pre>
+<p>which can also be defined in terms of the following CFG
+productions</p>
+<pre><code>A -&gt; a A | epsilon</code></pre>
+<p>What if we encode recursion in our host language?</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> exAs _ = alt (seq (item <span class="ch">&#39;a&#39;</span>) (<span class="kw">fun</span> _ -&gt; exAs())) eps</span></code></pre></div>
+<p>Some points to note. We can NOT write (the more direct) combinator
+program</p>
+<pre><code>let rec exAs = alt (conc (item &#39;a&#39;) exAs) eps</code></pre>
+<p>OCaml is a <em>strictly</em> evaluate language and the above would
+immediately lead to a stack overflow. Hence, we need to ‘hide’ the
+recursive call within a (lambda) function.</p>
+<p>Aside. In the <em>lazy</em> language Haskell, the more direct
+encoding is possible because program parts are lazily evaluated
+(i.e. only when needed).</p>
+<p>Some example runs.</p>
+<pre><code># #use &quot;parserComb.ml&quot;;;
+type &#39;a parser = Parser of (string -&gt; (string * &#39;a) option)
+val hd : string -&gt; char = &lt;fun&gt;
+val tail : string -&gt; string = &lt;fun&gt;
+val parse : &#39;a parser -&gt; string -&gt; (string * &#39;a) option = &lt;fun&gt;
+val eps : string parser = Parser &lt;fun&gt;
+val item : char -&gt; char parser = &lt;fun&gt;
+val alt : &#39;a parser -&gt; &#39;a parser -&gt; &#39;a parser = &lt;fun&gt;
+val seq : &#39;a parser -&gt; (&#39;a -&gt; &#39;b parser) -&gt; &#39;b parser = &lt;fun&gt;
+val conc : &#39;a parser -&gt; &#39;b parser -&gt; &#39;b parser = &lt;fun&gt;
+val matcher : &#39;a parser -&gt; string -&gt; bool = &lt;fun&gt;
+val ex0 : char parser = Parser &lt;fun&gt;
+val ex1 : char parser = Parser &lt;fun&gt;
+val ex2 : char parser = Parser &lt;fun&gt;
+val exAs : unit -&gt; string parser = &lt;fun&gt;
+# matcher (exAs()) &quot;&quot;;;
+- : bool = true
+# matcher (exAs()) &quot;aaa&quot;;;
+- : bool = true
+# matcher (exAs()) &quot;aab&quot;;;
+- : bool = false</code></pre>
+<h2 id="short-summary">Short Summary</h2>
+<ul>
+<li><p>Parser combinators are domain-specific language embedded into
+some host language (here OCaml).</p></li>
+<li><p>Our host language OCaml is strongly type, so we can statically
+guarantee that our parsers are “well-formed” (a parser is a composition
+of existing parsers).</p></li>
+<li><p>We make use of recursion available in the host language to extend
+the expressiveness of our parser combinator language (see encoding of
+Kleene star).</p></li>
+</ul>
+<h2 id="complete-source-code">Complete source code</h2>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode ml"><code class="sourceCode ocaml"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* File parserComb *)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> &#39;a <span class="kw">parser</span> = Parser <span class="kw">of</span> (<span class="dt">string</span> -&gt;  (<span class="dt">string</span> * &#39;a) <span class="dt">option</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                                             </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> hd s = <span class="dt">String</span>.get s <span class="dv">0</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> tail s = <span class="dt">String</span>.sub s <span class="dv">1</span> ((<span class="dt">String</span>.length s) - <span class="dv">1</span>)                      </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> parse p s = <span class="kw">match</span> p <span class="kw">with</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>                  Parser f -&gt; f s</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> eps = Parser (<span class="kw">fun</span> s -&gt; <span class="dt">Some</span> (s, <span class="st">&quot;&quot;</span>))</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>                                </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> item x = Parser (<span class="kw">fun</span> s -&gt;  <span class="kw">match</span> s <span class="kw">with</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>                               | <span class="st">&quot;&quot;</span> -&gt; <span class="dt">None</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>                               | s  -&gt; <span class="kw">if</span> x == hd s</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>                                       <span class="kw">then</span> <span class="dt">Some</span> (tail s, x)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>                                       <span class="kw">else</span> <span class="dt">None</span>)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> alt p1 p2 = Parser (<span class="kw">fun</span> s -&gt; <span class="kw">match</span> (parse p1 s) <span class="kw">with</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>                                   | <span class="dt">None</span> -&gt; parse p2 s</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>                                   | <span class="dt">Some</span> r -&gt; <span class="dt">Some</span> r)</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> seq p1 p2 = Parser (<span class="kw">fun</span> s -&gt; <span class="kw">match</span> (parse p1 s) <span class="kw">with</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>                                 | <span class="dt">None</span> -&gt; <span class="dt">None</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>                                 | <span class="dt">Some</span> (s2,x) -&gt; parse (p2 x) s2)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> conc p1 p2 = seq p1 (<span class="kw">fun</span> _ -&gt; p2)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> matcher p s = <span class="kw">match</span> (parse p s) <span class="kw">with</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>                   | <span class="dt">None</span> -&gt; <span class="kw">false</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>                   | <span class="dt">Some</span> (r,_) -&gt; <span class="kw">match</span> r <span class="kw">with</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>                                   | <span class="st">&quot;&quot;</span> -&gt; <span class="kw">true</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>                                   | _  -&gt; <span class="kw">false</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>                                   <span class="co">(* == not defined for strings *)</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>                     </span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> ex0 = item <span class="ch">&#39;c&#39;</span>                     </span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> ex1 = alt (item <span class="ch">&#39;a&#39;</span>) (item <span class="ch">&#39;b&#39;</span>)</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> ex2 = conc ex0 ex1 </span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>                      </span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> exAs _ = alt (seq (item <span class="ch">&#39;a&#39;</span>) (<span class="kw">fun</span> _ -&gt; exAs())) eps</span></code></pre></div>
+</div>
+</body>
+</html>

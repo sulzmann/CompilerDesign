@@ -1,0 +1,1287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="Martin Sulzmann" />
+  <title>Regular Expressions</title>
+  <style type="text/css">
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+    href="https://www.w3.org/Talks/Tools/Slidy2/styles/slidy.css" />
+  <script src="https://www.w3.org/Talks/Tools/Slidy2/scripts/slidy.js"
+    charset="utf-8" type="text/javascript"></script>
+</head>
+<body>
+<div class="slide titlepage">
+  <h1 class="title">Regular Expressions</h1>
+  <p class="author">
+Martin Sulzmann
+  </p>
+</div>
+<div id="overview" class="slide section level1">
+<h1>Overview</h1>
+<ul>
+<li>Popular notation to specify (infinitely many) string patterns.</li>
+</ul>
+<pre><code>(a | b)*</code></pre>
+<p>denotes the (infinite) set of strings</p>
+<pre><code>&quot;&quot;, &quot;a&quot;, &quot;b&quot;, &quot;ab&quot;, &quot;ba&quot;, ...</code></pre>
+<ul>
+<li><p>Play vital role during the lexical analysis stage of a
+compiler.</p></li>
+<li><p>Many (many) more useful applications exist (text search, formal
+specifications, …)</p></li>
+<li><p>We will take a look at the theory behind regular
+expressions.</p></li>
+<li><p>Build a simple regular expression compiler (matcher).</p></li>
+<li><p>So by the way we learn something about the various stages of a
+compiler.</p></li>
+</ul>
+</div>
+<div id="a-regular-expression-compiler" class="slide section level1">
+<h1>A Regular Expression Compiler</h1>
+<p>Purpose: Check if a regular expression matches a string (word).</p>
+<p>Things to talk about:</p>
+<ul>
+<li><p>Syntax</p></li>
+<li><p>Semantics</p></li>
+<li><p>Compilation</p></li>
+</ul>
+</div>
+<div id="regular-expressions" class="slide section level1">
+<h1>Regular Expressions</h1>
+<h2 id="examples">Examples</h2>
+<pre><code>ab* </code></pre>
+<pre><code>(cd|a)</code></pre>
+<pre><code>ab* | cd | a</code></pre>
+<h2 id="informal-meaning">Informal Meaning</h2>
+<pre><code>(cd|a)</code></pre>
+<ul>
+<li><p>Concatenation of symbols (letters) <code>c</code> and
+<code>d</code>, written <code>cd</code></p></li>
+<li><p>Alternatives, written <code>|</code> (choice operator)</p></li>
+</ul>
+<p>What about?</p>
+<pre><code>ab* </code></pre>
+<ul>
+<li><p>As we know, <code>*</code> stands for Kleene star (zero or more
+repetition)</p></li>
+<li><p>Kleene star operator binds tighter than concatenation</p></li>
+<li><p>So, the above corresponds to <code>a(b*)</code></p></li>
+</ul>
+<p>What about?</p>
+<pre><code>ab* | cd | a</code></pre>
+<ul>
+<li><code>|</code> is commutative (order does not matter)</li>
+</ul>
+<h2 id="extensions">Extensions</h2>
+<p>What about the following?</p>
+<pre><code>ab+</code></pre>
+<pre><code>cd? | e</code></pre>
+<pre><code>^cb*</code></pre>
+<p>We encounter three new (unary) operators. Two postfix operators
+(<code>+</code> and <code>?</code>) and one prefix operator
+(<code>^</code>).</p>
+<ul>
+<li><p><code>+</code> stands for one ore more repetitions</p></li>
+<li><p><code>?</code> stands for optional expression</p></li>
+<li><p><code>^</code> stands for negation</p></li>
+</ul>
+<p>As we will see, <code>+</code> and <code>?</code> can be desugared
+into existing set of regular expression operators whereas <code>^</code>
+requires a language extension.</p>
+<h2 id="expressiveness">Expressiveness</h2>
+<p>Provide some regular patterns to describe the following string
+patterns (if possible!).</p>
+<ul>
+<li><p>Arbitrary permutations of the letters <code>a</code> and
+<code>b</code>.</p></li>
+<li><p>All strings (over letters <code>1</code> and <code>0</code>) that
+contain at least one <code>1</code>.</p></li>
+<li><p>All strings that describe variable identifiers in Java.</p></li>
+<li><p>All strings where for each opening parenthesis <code>(</code>
+there is a closing parenthesis <code>)</code>.</p></li>
+</ul>
+</div>
+<div id="concrete-versus-abstract-syntax" class="slide section level1">
+<h1>Concrete versus Abstract Syntax</h1>
+<p>Concrete syntax:</p>
+<ul>
+<li><p>As seen by the user, convenient to use, rich set of
+operators</p></li>
+<li><p>Typically defined in terms of some <a
+href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form">EBNF</a></p></li>
+</ul>
+<p>Abstract syntax:</p>
+<ul>
+<li><p>Compact representation of a (concrete) syntactic regular
+expression</p></li>
+<li><p>Used for further automatic processing</p></li>
+<li><p>Tree-like structure</p></li>
+</ul>
+<h2 id="concrete-syntax-in-ebnf">Concrete Syntax in EBNF</h2>
+<pre><code>r ::= &#39;a&#39; | &#39;b&#39; | ...             Symbols aka letters taken from a finite alphabet
+   |  r &#39;|&#39;  r                    Alternatives
+   |  r r                         Concatenation
+   | r &#39;*&#39;                        Kleene star
+   | r &#39;+&#39;                        One or more repetitions
+   | r &#39;?&#39;                        Option
+   | &#39;(&#39; r &#39;)&#39;                    Parentheses</code></pre>
+<ul>
+<li><p>We ignore <code>^</code></p></li>
+<li><p>Note the different between <code>|</code> and <code>'|'</code>.
+The former refers to the meta-symbol to represent alternatives at the
+level of EBNF whereas the letter refers to the object-symbol to
+represent alternatives among regular expressions.</p></li>
+<li><p>We have ignored white space, tabs etc.</p></li>
+</ul>
+<h2 id="abstract-syntax-in-ebnf">Abstract Syntax in EBNF</h2>
+<pre><code>r ::= &#39;a&#39; | &#39;b&#39; | ...             Symbols
+   |  r &#39;|&#39;  r                    Alternatives
+   |  r &#39;.&#39; r                     Concatenation
+   | r &#39;+&#39;                        One or more repetitions
+   | &quot;epsilon&quot;                    Empty string</code></pre>
+<ul>
+<li><p>Explicit operator for concatenation</p></li>
+<li><p>Desugaring of (some of our) extensions</p></li>
+</ul>
+<pre><code>r*  ==&gt;   epsilon | r+
+
+r?  ==&gt;   epsilon | r</code></pre>
+<ul>
+<li>Parentheses removed based on abstract syntax <b>tree</b>
+representation</li>
+</ul>
+<pre><code>(ab) | c   ==&gt;             |
+                          / \
+                         .   c
+                        /  \
+                       a    b    </code></pre>
+<p>Aside: Consider the source expression <code>abc</code>. This
+expression is ambiguous because it has several abstract syntax tree
+(AST) representations. We will discuss this topic in more detail later
+(syntax analysis).</p>
+<h2 id="parsing">Parsing</h2>
+<p>Parsing is the process of transforming a source expression into an
+AST.</p>
+<p>We largely ignore parsing for the moment and assume that regular
+expressions are represented in terms of some suitable abstract syntax
+(tree) format.</p>
+</div>
+<div id="language-semantics" class="slide section level1">
+<h1>Language Semantics</h1>
+<p>Before we can build a compiler we need a formal semantic description
+of the language.</p>
+<p>As a user you expect that different compilers behave the same. Many
+languages (e.g. C) were lacking a formal semantic description and hence
+users were surprised to encounter differences among compilers.</p>
+<p>At the time of C, formal semantic descriptions were not common and
+tools/methods for such descriptions were not quite up to standard yet.
+This has changed drastically nowadays. See C, Java (and its JVM).</p>
+<p>Thankfully, the semantic description of regular expressions is pretty
+straightforward. From now on we will work with the following abstract
+syntax.</p>
+<pre><code>r,s ::= a | b | c | ...         Symbols aka letters taken from a finite alphabet
+    |  epsilon                  Empty word
+    |  phi                      Empty language
+    |  r + r                    Alternatives
+    |  r . r                    Sequence aka concatenation
+    |  r*                       Kleene star
+
+u,v,w ::= epsilon               empty word
+      |  w . w                  concatenation</code></pre>
+<ul>
+<li><p>Yes, I’m lazy and will drop quotes from now on.</p></li>
+<li><p>We use <code>+</code> so we don’t get confused with the EBNF
+meta-symbol <code>|</code>.</p></li>
+<li><p>Why <code>phi</code> the empty language? We will see
+later.</p></li>
+<li><p>Words and strings are used synonymously and denote sequences of
+letters.</p></li>
+</ul>
+<h2 id="lr">L(r)</h2>
+<p><code>L(r)</code> denotes the set of words represented by the regular
+expression r.</p>
+<p>Standard (denotational) formulation of L(r):</p>
+<pre><code>L(x) = { x }
+
+L(epsilon) = { epsilon }
+
+L(phi) = { }
+
+L(r + s) = { w | w in L(r) or w in L(s) }
+
+L(r . s) = { v . w | v in L(r) and w in L(s) }
+
+L(r*) = { epsilon } cap { w_1 . ... . w_n | w_1, ..., w_n in L(r) and n &gt;=1 }</code></pre>
+<h2 id="towards-a-regular-expression-compilermatcher">Towards a Regular
+Expression Compiler/Matcher</h2>
+<p>For us humans, regular expressions are a intuitive formalism to
+specify string patterns. For example, it is fairly easy to see that the
+string <code>a.b.a</code> is part of the language denotation of
+expression <code>(a+b)*</code>. That is, <code>a.b.a</code> is an
+element of <code>L((a+b)*)</code>. We say that expression
+<code>(a+b)*</code> matches the string <code>a.b.a</code>.</p>
+<p>Aside: The abstract syntax does not (need to) support parentheses as
+we can always use the tree representation to unambiguously represent a
+regular expression. I’m making use of parentheses because I’m too lazy
+to draw the tree.</p>
+<p>The question is how to automate the processing of checking that an
+expression matches a string? That is, we wish to compile regular
+expressions such that we can apply a systematic method for matching
+against a word.</p>
+<h2 id="finite-state-machines-fsm">Finite State Machines (FSM)</h2>
+<p>It is well understood how to convert a regular expression into a
+finite state machine. Roughly, a FSM consists of a finite set of states
+where execution starts in some initial state. Execution is driven by the
+consumption of symbols from some input string. Based on a state
+transition table which tells us where to move next (to which state)
+given our current state and input symbol, we can systematically process
+the input string. The string is accepted if we reach a designated
+(final) state.</p>
+<p>We will consider two classic approaches to transform a regular
+expression (RegEx) into a FSM.</p>
+<p>One approach turns the RegEx into a non-deterministic finite automate
+(=machine). Non-deterministic means that in the state transition table
+there are several entries for a given current state and input symbol.
+The other approach results in a deterministic finite automata.</p>
+</div>
+<div id="thompson-nfa-construction" class="slide section level1">
+<h1>Thompson NFA Construction</h1>
+<p>NFA = non-deterministic finite automata</p>
+<p><b>Black/white board</b></p>
+<p>See also Chapter 3.7 Dragon book or check <a
+href="https://en.wikipedia.org/wiki/Thompson%27s_construction">here</a>.</p>
+<h2 id="how-to-implement-all-that">How to implement all that?</h2>
+<p>As a start we consider a class-based language such as C++.</p>
+<p><b>NOTE</b>: Our language of choice for this course is <a
+href="https://ocaml.org/">OCaml</a>. As the name hints OCaml also
+supports some object-oriented programming features. However, we will (as
+much as possible) stick to the functional subset of OCaml. To ease the
+pain of writing functional programs for those coming from a more OO
+background, we will therefore first consider a sketch of C++
+implementation before moving on to an implementation in OCaml.</p>
+<h3 id="sketch-in-c">Sketch in C++</h3>
+<h4 id="fsa-representation">FSA Representation</h4>
+<p>Some class to represent transitions.</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Transition <span class="op">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a> <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> from<span class="op">;</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">char</span> c<span class="op">;</span> </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> to<span class="op">;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> epsilon<span class="op">;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a> <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  Transition<span class="op">(</span><span class="dt">int</span> _from<span class="op">,</span> <span class="dt">int</span> _to<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    from <span class="op">=</span> _from<span class="op">;</span> to <span class="op">=</span> _to<span class="op">;</span> </span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    epsilon <span class="op">=</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> </span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  Transition<span class="op">(</span><span class="dt">int</span> _from<span class="op">,</span> <span class="dt">char</span> _c<span class="op">,</span> <span class="dt">int</span> _to<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    from <span class="op">=</span> _from<span class="op">;</span> c <span class="op">=</span> _c<span class="op">;</span> to <span class="op">=</span> _to<span class="op">;</span> </span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    epsilon <span class="op">=</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> </span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> isEpsilonTransition<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> epsilon<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> toState<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> to<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> trigger<span class="op">(</span><span class="dt">int</span> from<span class="op">,</span> <span class="dt">char</span> c<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(!</span>epsilon <span class="op">&amp;&amp;</span> from <span class="op">==</span> <span class="kw">this</span><span class="op">-&gt;</span>from <span class="op">&amp;&amp;</span> c <span class="op">==</span> <span class="kw">this</span><span class="op">-&gt;</span>c<span class="op">);</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> trigger<span class="op">(</span><span class="dt">int</span> from<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(</span>epsilon <span class="op">&amp;&amp;</span> from <span class="op">==</span> <span class="kw">this</span><span class="op">-&gt;</span>from<span class="op">);</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a> <span class="op">}</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div>
+<p>Classic OO abstraction to represent an NFA:</p>
+<ul>
+<li><p>Some member variables (aka instance variables) represent the
+structure of the automata.</p></li>
+<li><p>Some methods for execution.</p></li>
+<li><p>For fun split into two classes where <code>NFA</code> contains
+the data representation part and <code>FSA</code> contains the execution
+part.</p></li>
+</ul>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> NFA <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a> <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span>Transition<span class="op">&gt;</span> ts<span class="op">;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> init<span class="op">;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> <span class="kw">final</span><span class="op">;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a> <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  NFA<span class="op">(</span>vector<span class="op">&lt;</span>Transition<span class="op">&gt;</span> _ts<span class="op">,</span> <span class="dt">int</span> _init<span class="op">,</span> vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> _final<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    ts <span class="op">=</span> _ts<span class="op">;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    init <span class="op">=</span> _init<span class="op">;</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">final</span> <span class="op">=</span> _final<span class="op">;</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  NFA<span class="op">(</span>vector<span class="op">&lt;</span>Transition<span class="op">&gt;</span> _ts<span class="op">,</span> <span class="dt">int</span> _init<span class="op">,</span> <span class="dt">int</span> _final<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    ts <span class="op">=</span> _ts<span class="op">;</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    init <span class="op">=</span> _init<span class="op">;</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">final</span><span class="op">.</span>push_back<span class="op">(</span>_final<span class="op">);</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span>Transition<span class="op">&gt;</span> getTransitions<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> ts<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> getInitial<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> getFinals<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">final</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">friend</span> <span class="kw">class</span> FSA<span class="op">;</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> FSA <span class="op">:</span> <span class="kw">public</span> NFA <span class="op">{</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a> <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> current<span class="op">;</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> closure<span class="op">();</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a> <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  FSA<span class="op">(</span>NFA fsa<span class="op">)</span> <span class="op">:</span> NFA<span class="op">(</span>fsa<span class="op">.</span>ts<span class="op">,</span>fsa<span class="op">.</span>init<span class="op">,</span>fsa<span class="op">.</span><span class="kw">final</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>    current<span class="op">.</span>push_back<span class="op">(</span>init<span class="op">);</span></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>    closure<span class="op">();</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> reset<span class="op">();</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">void</span> step<span class="op">(</span><span class="dt">char</span> c<span class="op">);</span></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> isFinal<span class="op">();</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>  <span class="dt">bool</span> run<span class="op">(</span>string s<span class="op">);</span></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> FSA<span class="op">::</span>reset<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>    current<span class="op">.</span>clear<span class="op">();</span></span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>    current<span class="op">.</span>push_back<span class="op">(</span>init<span class="op">);</span></span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>    closure<span class="op">();</span></span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> FSA<span class="op">::</span>isFinal<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="kw">final</span><span class="op">.</span>size<span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span><span class="op">(</span>find<span class="op">(</span>current<span class="op">.</span>begin<span class="op">(),</span>current<span class="op">.</span>end<span class="op">(),</span><span class="kw">final</span><span class="op">[</span>i<span class="op">])</span> <span class="op">!=</span> current<span class="op">.</span>end<span class="op">())</span></span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span></span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span>     </span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span></span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> FSA<span class="op">::</span>closure<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>  <span class="co">// omit</span></span>
+<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> FSA<span class="op">::</span>step<span class="op">(</span><span class="dt">char</span> c<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>    vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> next<span class="op">;</span></span>
+<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> ts<span class="op">.</span>size<span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> j<span class="op">=</span><span class="dv">0</span><span class="op">;</span> j <span class="op">&lt;</span> current<span class="op">.</span>size<span class="op">();</span> j<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>ts<span class="op">[</span>i<span class="op">].</span>trigger<span class="op">(</span>current<span class="op">[</span>j<span class="op">],</span>c<span class="op">))</span></span>
+<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a>      next<span class="op">.</span>push_back<span class="op">(</span>ts<span class="op">[</span>i<span class="op">].</span>toState<span class="op">());</span></span>
+<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb19-66"><a href="#cb19-66" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb19-67"><a href="#cb19-67" aria-hidden="true" tabindex="-1"></a>    current <span class="op">=</span> next<span class="op">;</span></span>
+<span id="cb19-68"><a href="#cb19-68" aria-hidden="true" tabindex="-1"></a>    closure<span class="op">();</span></span>
+<span id="cb19-69"><a href="#cb19-69" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-70"><a href="#cb19-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-71"><a href="#cb19-71" aria-hidden="true" tabindex="-1"></a><span class="dt">bool</span> FSA<span class="op">::</span>run<span class="op">(</span>string s<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb19-72"><a href="#cb19-72" aria-hidden="true" tabindex="-1"></a>  reset<span class="op">();</span></span>
+<span id="cb19-73"><a href="#cb19-73" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> s<span class="op">.</span>length<span class="op">();</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb19-74"><a href="#cb19-74" aria-hidden="true" tabindex="-1"></a>    step<span class="op">(</span>s<span class="op">[</span>i<span class="op">]);</span></span>
+<span id="cb19-75"><a href="#cb19-75" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb19-76"><a href="#cb19-76" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> isFinal<span class="op">();</span></span>
+<span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h4 id="regex-representation">RegEx Representation</h4>
+<p>The various RegEx operations are represented as derived classes
+(roughly following the composite design pattern).</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RE <span class="op">{};</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Ch <span class="op">:</span> <span class="kw">public</span> RE <span class="op">{</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a> <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">char</span> c<span class="op">;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  Ch <span class="op">(</span><span class="dt">char</span> _c<span class="op">)</span> <span class="op">{</span> c <span class="op">=</span> _c<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Alt <span class="op">:</span> <span class="kw">public</span> RE <span class="op">{</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a> <span class="kw">private</span><span class="op">:</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  RE<span class="op">*</span> r1<span class="op">;</span> <span class="co">// Recall that if we want to use virtual methods in C++,</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  RE<span class="op">*</span> r2<span class="op">;</span> <span class="co">// they must operate on a dynamic (heap-allocated) object.</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a> <span class="kw">public</span><span class="op">:</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  Alt <span class="op">(</span>RE<span class="op">*</span> _r1<span class="op">,</span> RE<span class="op">*</span> _r2<span class="op">)</span> <span class="op">{</span> r1 <span class="op">=</span> _r1<span class="op">;</span> r2 <span class="op">=</span> _r2<span class="op">;</span> <span class="op">}</span>  </span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co">// and so on  </span></span></code></pre></div>
+<h4 id="thompson-transformation">Thompson Transformation</h4>
+<p>How to implement the (Thompson) transformation from <code>RE</code>
+to <code>NFA</code>? As the transformation largely observes the various
+RegEx pattern constructs, there are three possible approaches in an OO
+language:</p>
+<ul>
+<li><p>Introduce some virtual method in <code>RE</code> which then will
+be specialized for the derived classes.</p></li>
+<li><p>Apply the visitor design pattern.</p></li>
+<li><p>Apply some dynamic type dispatch (see instanceOf in Java), here’s
+a sketch in C++ (details are missing!)</p></li>
+</ul>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode cpp"><code class="sourceCode cpp"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>NFA transformWorker<span class="op">(</span>RE <span class="op">*</span>r<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  vector<span class="op">&lt;</span>Transition<span class="op">&gt;</span> ts<span class="op">;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> start<span class="op">,</span> stop<span class="op">;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">switch</span><span class="op">(</span>r<span class="op">-&gt;</span>ofType<span class="op">())</span> <span class="op">{</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> AltType<span class="op">:</span> <span class="op">{</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>     Alt<span class="op">*</span> r2 <span class="op">=</span> <span class="op">(</span>Alt<span class="op">*)</span> r<span class="op">;</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>     <span class="co">// 1. Build NFA for left and right operand</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>     NFA n1 <span class="op">=</span> transformWorker<span class="op">(</span>r2<span class="op">-&gt;</span>getLeft<span class="op">());</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>     NFA n2 <span class="op">=</span> transformWorker<span class="op">(</span>r2<span class="op">-&gt;</span>getRight<span class="op">());</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>     <span class="co">// 2. Build new initial and final state.</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>     start <span class="op">=</span> fresh<span class="op">();</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>     stop <span class="op">=</span> fresh<span class="op">();</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>     <span class="dt">int</span> n1_start <span class="op">=</span> n1<span class="op">.</span>getInitial<span class="op">();</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>     <span class="dt">int</span> n1_stop  <span class="op">=</span> n1<span class="op">.</span>getFinals<span class="op">()[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>     <span class="dt">int</span> n2_start <span class="op">=</span> n2<span class="op">.</span>getInitial<span class="op">();</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>     <span class="dt">int</span> n2_stop  <span class="op">=</span> n2<span class="op">.</span>getFinals<span class="op">()[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>     <span class="co">// 3. Build NFA for alternative.</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>     vector<span class="op">&lt;</span>Transition<span class="op">&gt;</span> t1 <span class="op">=</span> n1<span class="op">.</span>getTransitions<span class="op">();</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>     vector<span class="op">&lt;</span>Transition<span class="op">&gt;</span> t2 <span class="op">=</span> n2<span class="op">.</span>getTransitions<span class="op">();</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>     ts<span class="op">.</span>insert<span class="op">(</span>ts<span class="op">.</span>end<span class="op">(),</span>t1<span class="op">.</span>begin<span class="op">(),</span>t1<span class="op">.</span>end<span class="op">());</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>     ts<span class="op">.</span>insert<span class="op">(</span>ts<span class="op">.</span>end<span class="op">(),</span>t2<span class="op">.</span>begin<span class="op">(),</span>t2<span class="op">.</span>end<span class="op">());</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>     ts<span class="op">.</span>push_back<span class="op">(</span>Transition<span class="op">(</span>start<span class="op">,</span> n1_start<span class="op">));</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>     ts<span class="op">.</span>push_back<span class="op">(</span>Transition<span class="op">(</span>start<span class="op">,</span> n2_start<span class="op">));</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>     ts<span class="op">.</span>push_back<span class="op">(</span>Transition<span class="op">(</span>n1_stop<span class="op">,</span> stop<span class="op">));</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>     ts<span class="op">.</span>push_back<span class="op">(</span>Transition<span class="op">(</span>n2_stop<span class="op">,</span> stop<span class="op">));</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>     <span class="cf">return</span> NFA<span class="op">(</span>ts<span class="op">,</span>start<span class="op">,</span>stop<span class="op">);</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span> <span class="co">// switch</span></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="co">// transform</span></span></code></pre></div>
+<h3 id="the-ocaml-functional-approach">The OCaml (functional)
+approach</h3>
+<p>Functional languages are great at representation tree-like data
+structures and writing functions which operate on them. Here’s a sketch
+how to implement the Thompson transformation in OCaml.</p>
+<h3 id="fsa-representation-1">FSA Representation</h3>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> transition = TransChar <span class="kw">of</span> <span class="dt">int</span>*<span class="dt">char</span>*<span class="dt">int</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                | TransEps <span class="kw">of</span> <span class="dt">int</span>*<span class="dt">int</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                                    </span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> fsa = { start : <span class="dt">int</span>;</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>             final : <span class="dt">int</span> <span class="dt">list</span>;</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>             trans : transition <span class="dt">list</span> }</span></code></pre></div>
+<p>Running the NFA.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> run nfa current ws = <span class="kw">match</span> ws <span class="kw">with</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  | [] -&gt; <span class="dt">List</span>.exists (<span class="kw">fun</span> x -&gt; <span class="dt">List</span>.mem x nfa.final) (closure nfa current)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  | (w::ws) -&gt; <span class="kw">let</span> clos = closure nfa current <span class="kw">in</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>               <span class="kw">let</span> next = removeDuplicates</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>                                (<span class="dt">List</span>.concat (<span class="dt">List</span>.map (step nfa w) clos)) <span class="kw">in</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>               run nfa next ws</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> matcher nfa ws = run nfa [nfa.start] (toList ws)</span></code></pre></div>
+<p>Aside. Like in C, a function must be declared first before being
+used. If there are mutual dependencies, you will need to combine them in
+a mutually defined <code>let</code> binding group.</p>
+<p>Helper functions.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* retrieve all states (avoiding duplicates),</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co">   assumes that each state is mentioned in some transition *)</span>             </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> allStates fsa = removeDuplicates (</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">List</span>.concat (</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                          <span class="dt">List</span>.map (<span class="kw">fun</span> t -&gt; <span class="kw">match</span> t <span class="kw">with</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                                             | TransChar (s1,_,s2) -&gt; [s1; s2]</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>                                             | TransEps (s1,s2) -&gt; [s1; s2])</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>                          fsa.trans))</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="co">(* compute all transitions that can be reached via an epsilon transition *)</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> stepEpsilon nfa state =</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>       <span class="kw">let</span> <span class="kw">rec</span> go ts = <span class="kw">match</span> ts <span class="kw">with</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>                         | [] -&gt; []                                       </span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>                         | (TransChar _::ts) -&gt; go ts </span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>                         | (TransEps (s1,s2))::ts -&gt; <span class="kw">if</span> state == s1</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>                                                     <span class="kw">then</span> s2 :: go ts</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>                                                     <span class="kw">else</span> go ts        </span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>       <span class="kw">in</span> go nfa.trans</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="co">(* build closure:</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="co">   for each current state apply stepEpsilon</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a><span class="co">   remove all duplicates</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="co">   continue as long as new states are added *)</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> closure nfa current =</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> next = removeDuplicates (<span class="dt">List</span>.append</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>                                     current</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>                                     (<span class="dt">List</span>.concat (<span class="dt">List</span>.map (stepEpsilon nfa)</span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>                                                             current))) <span class="kw">in</span></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>  <span class="kw">if</span> <span class="dt">List</span>.length next == <span class="dt">List</span>.length current</span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>     <span class="co">(* next == current will not work !!!*)</span></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>  <span class="kw">then</span> current</span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>  <span class="kw">else</span> closure nfa next</span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a><span class="co">(* consume sym and move to next set of states *)</span>               </span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> step nfa sym state =</span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a>  <span class="dt">List</span>.fold_left (<span class="kw">fun</span> states -&gt;</span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>                  <span class="kw">fun</span> t -&gt; <span class="kw">match</span> t <span class="kw">with</span></span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>                             | TransEps _ -&gt; states</span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a>                             | TransChar (s1,c,s2) -&gt; <span class="kw">if</span> s1 == state &amp;&amp; sym == c</span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a>                                                      <span class="kw">then</span> s2 :: states</span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a>                                                      <span class="kw">else</span> states)</span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a>                  [] nfa.trans</span></code></pre></div>
+<h2 id="complete-ocaml-source-code">Complete OCaml Source Code</h2>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co">(* File thompson.ml *)</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co">(* Making use of http://caml.inria.fr/pub/docs/manual-ocaml/libref/List.html *)</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="co">(* Finite State Automata:</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co">     (1) Some initial state</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="co">     (2) Set of final states</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="co">     (3) Set of transitions,</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a><span class="co">          either epsilon transition (spontaneous move from one state to the next, or</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a><span class="co">          consumption of some input symbol                                                                                       </span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="co"> *)</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> transition = TransChar <span class="kw">of</span> <span class="dt">int</span>*<span class="dt">char</span>*<span class="dt">int</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>                | TransEps <span class="kw">of</span> <span class="dt">int</span>*<span class="dt">int</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>                                    </span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> fsa = { start : <span class="dt">int</span>;</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>             final : <span class="dt">int</span> <span class="dt">list</span>;</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>             trans : transition <span class="dt">list</span> }</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a><span class="co">(* removing duplicates *)</span>             </span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> uniq_cons x xs = <span class="kw">if</span> <span class="dt">List</span>.mem x xs <span class="kw">then</span> xs <span class="kw">else</span> x :: xs</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> removeDuplicates xs = <span class="dt">List</span>.fold_right uniq_cons xs []             </span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a><span class="co">(* retrieve all states (avoiding duplicates),</span></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a><span class="co">   assumes that each state is mentioned in some transition *)</span>             </span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> allStates fsa = removeDuplicates (</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>                    <span class="dt">List</span>.concat (</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>                          <span class="dt">List</span>.map (<span class="kw">fun</span> t -&gt; <span class="kw">match</span> t <span class="kw">with</span></span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>                                             | TransChar (s1,_,s2) -&gt; [s1; s2]</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>                                             | TransEps (s1,s2) -&gt; [s1; s2])</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>                          fsa.trans))</span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a><span class="co">(* compute all transitions that can be reached via an epsilon transition *)</span></span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> stepEpsilon nfa state =</span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a>       <span class="kw">let</span> <span class="kw">rec</span> go ts = <span class="kw">match</span> ts <span class="kw">with</span></span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a>                         | [] -&gt; []                                       </span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a>                         | (TransChar _::ts) -&gt; go ts </span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a>                         | (TransEps (s1,s2))::ts -&gt; <span class="kw">if</span> state == s1</span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true" tabindex="-1"></a>                                                     <span class="kw">then</span> s2 :: go ts</span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true" tabindex="-1"></a>                                                     <span class="kw">else</span> go ts        </span>
+<span id="cb25-45"><a href="#cb25-45" aria-hidden="true" tabindex="-1"></a>       <span class="kw">in</span> go nfa.trans</span>
+<span id="cb25-46"><a href="#cb25-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-47"><a href="#cb25-47" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb25-48"><a href="#cb25-48" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> print_list_of_int xs = <span class="kw">match</span> xs <span class="kw">with</span></span>
+<span id="cb25-49"><a href="#cb25-49" aria-hidden="true" tabindex="-1"></a>  | [] -&gt; <span class="dt">print_string</span> <span class="st">&quot;&quot;</span></span>
+<span id="cb25-50"><a href="#cb25-50" aria-hidden="true" tabindex="-1"></a>  | x::xs -&gt; <span class="dt">print_string</span> (<span class="dt">string_of_int</span> x);</span>
+<span id="cb25-51"><a href="#cb25-51" aria-hidden="true" tabindex="-1"></a>             <span class="dt">print_string</span> <span class="st">&quot; &quot;</span>;</span>
+<span id="cb25-52"><a href="#cb25-52" aria-hidden="true" tabindex="-1"></a>             print_list_of_int xs</span>
+<span id="cb25-53"><a href="#cb25-53" aria-hidden="true" tabindex="-1"></a>             </span>
+<span id="cb25-54"><a href="#cb25-54" aria-hidden="true" tabindex="-1"></a><span class="co">(* build closure:</span></span>
+<span id="cb25-55"><a href="#cb25-55" aria-hidden="true" tabindex="-1"></a><span class="co">   for each current state apply stepEpsilon</span></span>
+<span id="cb25-56"><a href="#cb25-56" aria-hidden="true" tabindex="-1"></a><span class="co">   remove all duplicates</span></span>
+<span id="cb25-57"><a href="#cb25-57" aria-hidden="true" tabindex="-1"></a><span class="co">   continue as long as new states are added *)</span></span>
+<span id="cb25-58"><a href="#cb25-58" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> closure nfa current =</span>
+<span id="cb25-59"><a href="#cb25-59" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> next = removeDuplicates (<span class="dt">List</span>.append</span>
+<span id="cb25-60"><a href="#cb25-60" aria-hidden="true" tabindex="-1"></a>                                     current</span>
+<span id="cb25-61"><a href="#cb25-61" aria-hidden="true" tabindex="-1"></a>                                     (<span class="dt">List</span>.concat (<span class="dt">List</span>.map (stepEpsilon nfa)</span>
+<span id="cb25-62"><a href="#cb25-62" aria-hidden="true" tabindex="-1"></a>                                                             current))) <span class="kw">in</span></span>
+<span id="cb25-63"><a href="#cb25-63" aria-hidden="true" tabindex="-1"></a>  <span class="kw">if</span> <span class="dt">List</span>.length next == <span class="dt">List</span>.length current</span>
+<span id="cb25-64"><a href="#cb25-64" aria-hidden="true" tabindex="-1"></a>     <span class="co">(* next == current will not work !!!*)</span></span>
+<span id="cb25-65"><a href="#cb25-65" aria-hidden="true" tabindex="-1"></a>  <span class="kw">then</span> current</span>
+<span id="cb25-66"><a href="#cb25-66" aria-hidden="true" tabindex="-1"></a>  <span class="kw">else</span> closure nfa next</span>
+<span id="cb25-67"><a href="#cb25-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-68"><a href="#cb25-68" aria-hidden="true" tabindex="-1"></a><span class="co">(* consume sym and move to next set of states *)</span>               </span>
+<span id="cb25-69"><a href="#cb25-69" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> step nfa sym state =</span>
+<span id="cb25-70"><a href="#cb25-70" aria-hidden="true" tabindex="-1"></a>  <span class="dt">List</span>.fold_left (<span class="kw">fun</span> states -&gt;</span>
+<span id="cb25-71"><a href="#cb25-71" aria-hidden="true" tabindex="-1"></a>                  <span class="kw">fun</span> t -&gt; <span class="kw">match</span> t <span class="kw">with</span></span>
+<span id="cb25-72"><a href="#cb25-72" aria-hidden="true" tabindex="-1"></a>                             | TransEps _ -&gt; states</span>
+<span id="cb25-73"><a href="#cb25-73" aria-hidden="true" tabindex="-1"></a>                             | TransChar (s1,c,s2) -&gt; <span class="kw">if</span> s1 == state &amp;&amp; sym == c</span>
+<span id="cb25-74"><a href="#cb25-74" aria-hidden="true" tabindex="-1"></a>                                                      <span class="kw">then</span> s2 :: states</span>
+<span id="cb25-75"><a href="#cb25-75" aria-hidden="true" tabindex="-1"></a>                                                      <span class="kw">else</span> states)</span>
+<span id="cb25-76"><a href="#cb25-76" aria-hidden="true" tabindex="-1"></a>                  [] nfa.trans</span>
+<span id="cb25-77"><a href="#cb25-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-78"><a href="#cb25-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-79"><a href="#cb25-79" aria-hidden="true" tabindex="-1"></a>                  </span>
+<span id="cb25-80"><a href="#cb25-80" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> run nfa current ws = <span class="kw">match</span> ws <span class="kw">with</span></span>
+<span id="cb25-81"><a href="#cb25-81" aria-hidden="true" tabindex="-1"></a>  | [] -&gt; <span class="dt">List</span>.exists (<span class="kw">fun</span> x -&gt; <span class="dt">List</span>.mem x nfa.final) (closure nfa current)</span>
+<span id="cb25-82"><a href="#cb25-82" aria-hidden="true" tabindex="-1"></a>  | (w::ws) -&gt; <span class="kw">let</span> clos = closure nfa current <span class="kw">in</span></span>
+<span id="cb25-83"><a href="#cb25-83" aria-hidden="true" tabindex="-1"></a>               <span class="kw">let</span> next = removeDuplicates</span>
+<span id="cb25-84"><a href="#cb25-84" aria-hidden="true" tabindex="-1"></a>                                (<span class="dt">List</span>.concat (<span class="dt">List</span>.map (step nfa w) clos)) <span class="kw">in</span></span>
+<span id="cb25-85"><a href="#cb25-85" aria-hidden="true" tabindex="-1"></a>               run nfa next ws</span>
+<span id="cb25-86"><a href="#cb25-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-87"><a href="#cb25-87" aria-hidden="true" tabindex="-1"></a><span class="co">(* Convert string to list of characters *)</span>                   </span>
+<span id="cb25-88"><a href="#cb25-88" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> toList ch = <span class="kw">match</span> ch <span class="kw">with</span></span>
+<span id="cb25-89"><a href="#cb25-89" aria-hidden="true" tabindex="-1"></a>    | <span class="st">&quot;&quot;</span> -&gt; []</span>
+<span id="cb25-90"><a href="#cb25-90" aria-hidden="true" tabindex="-1"></a>    | ch -&gt; (<span class="dt">String</span>.get ch <span class="dv">0</span> ) :: (toList (<span class="dt">String</span>.sub ch <span class="dv">1</span> ( (<span class="dt">String</span>.length ch)<span class="dv">-1</span>) ) )</span>
+<span id="cb25-91"><a href="#cb25-91" aria-hidden="true" tabindex="-1"></a>                                    </span>
+<span id="cb25-92"><a href="#cb25-92" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> matcher nfa ws = run nfa [nfa.start] (toList ws)</span>
+<span id="cb25-93"><a href="#cb25-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-94"><a href="#cb25-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-95"><a href="#cb25-95" aria-hidden="true" tabindex="-1"></a> <span class="kw">type</span> re =</span>
+<span id="cb25-96"><a href="#cb25-96" aria-hidden="true" tabindex="-1"></a>  | Epsilon</span>
+<span id="cb25-97"><a href="#cb25-97" aria-hidden="true" tabindex="-1"></a>  | Phi</span>
+<span id="cb25-98"><a href="#cb25-98" aria-hidden="true" tabindex="-1"></a>  | Letter <span class="kw">of</span> <span class="dt">char</span></span>
+<span id="cb25-99"><a href="#cb25-99" aria-hidden="true" tabindex="-1"></a>  | Seq <span class="kw">of</span> re * re</span>
+<span id="cb25-100"><a href="#cb25-100" aria-hidden="true" tabindex="-1"></a>  | Alt <span class="kw">of</span> re * re</span>
+<span id="cb25-101"><a href="#cb25-101" aria-hidden="true" tabindex="-1"></a>  | Star <span class="kw">of</span> re</span>
+<span id="cb25-102"><a href="#cb25-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-103"><a href="#cb25-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-104"><a href="#cb25-104" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> nameSupply = <span class="dt">ref</span> <span class="dv">1</span></span>
+<span id="cb25-105"><a href="#cb25-105" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> fresh _ =  nameSupply := !nameSupply + <span class="dv">1</span>;</span>
+<span id="cb25-106"><a href="#cb25-106" aria-hidden="true" tabindex="-1"></a>               !nameSupply</span>
+<span id="cb25-107"><a href="#cb25-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-108"><a href="#cb25-108" aria-hidden="true" tabindex="-1"></a><span class="co">(* apply thompson NFA transformation,</span></span>
+<span id="cb25-109"><a href="#cb25-109" aria-hidden="true" tabindex="-1"></a><span class="co">   we obtain a NFA where the number of states and transitions</span></span>
+<span id="cb25-110"><a href="#cb25-110" aria-hidden="true" tabindex="-1"></a><span class="co">   is linear in the size of the regex,</span></span>
+<span id="cb25-111"><a href="#cb25-111" aria-hidden="true" tabindex="-1"></a><span class="co">   there is also exactly one final state</span></span>
+<span id="cb25-112"><a href="#cb25-112" aria-hidden="true" tabindex="-1"></a><span class="co">*)</span>                </span>
+<span id="cb25-113"><a href="#cb25-113" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">rec</span> thompson re = <span class="kw">match</span> re <span class="kw">with</span></span>
+<span id="cb25-114"><a href="#cb25-114" aria-hidden="true" tabindex="-1"></a>  | Epsilon -&gt; <span class="kw">let</span> s1 = fresh() <span class="kw">in</span></span>
+<span id="cb25-115"><a href="#cb25-115" aria-hidden="true" tabindex="-1"></a>               <span class="kw">let</span> s2 = fresh() <span class="kw">in</span></span>
+<span id="cb25-116"><a href="#cb25-116" aria-hidden="true" tabindex="-1"></a>               { start = s1;</span>
+<span id="cb25-117"><a href="#cb25-117" aria-hidden="true" tabindex="-1"></a>                 final = [s2];</span>
+<span id="cb25-118"><a href="#cb25-118" aria-hidden="true" tabindex="-1"></a>                 trans = [TransEps (s1,s2)] }</span>
+<span id="cb25-119"><a href="#cb25-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-120"><a href="#cb25-120" aria-hidden="true" tabindex="-1"></a>                 </span>
+<span id="cb25-121"><a href="#cb25-121" aria-hidden="true" tabindex="-1"></a>  | Phi -&gt; <span class="kw">let</span> s1 = fresh() <span class="kw">in</span></span>
+<span id="cb25-122"><a href="#cb25-122" aria-hidden="true" tabindex="-1"></a>           <span class="kw">let</span> s2 = fresh() <span class="kw">in</span>                </span>
+<span id="cb25-123"><a href="#cb25-123" aria-hidden="true" tabindex="-1"></a>           { start = s1;</span>
+<span id="cb25-124"><a href="#cb25-124" aria-hidden="true" tabindex="-1"></a>             final = [s2];</span>
+<span id="cb25-125"><a href="#cb25-125" aria-hidden="true" tabindex="-1"></a>             trans = [] }</span>
+<span id="cb25-126"><a href="#cb25-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-127"><a href="#cb25-127" aria-hidden="true" tabindex="-1"></a>  | Letter sym -&gt; <span class="kw">let</span> s1 = fresh() <span class="kw">in</span></span>
+<span id="cb25-128"><a href="#cb25-128" aria-hidden="true" tabindex="-1"></a>                  <span class="kw">let</span> s2 = fresh() <span class="kw">in</span>                </span>
+<span id="cb25-129"><a href="#cb25-129" aria-hidden="true" tabindex="-1"></a>                  { start = s1;</span>
+<span id="cb25-130"><a href="#cb25-130" aria-hidden="true" tabindex="-1"></a>                    final = [s2];</span>
+<span id="cb25-131"><a href="#cb25-131" aria-hidden="true" tabindex="-1"></a>                    trans = [TransChar (s1,sym,s2)] }          </span>
+<span id="cb25-132"><a href="#cb25-132" aria-hidden="true" tabindex="-1"></a>  | Seq (r,s) -&gt; <span class="kw">let</span> nfa1 = thompson r <span class="kw">in</span></span>
+<span id="cb25-133"><a href="#cb25-133" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">let</span> nfa2 = thompson s <span class="kw">in</span></span>
+<span id="cb25-134"><a href="#cb25-134" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">let</span> s1 = fresh() <span class="kw">in</span></span>
+<span id="cb25-135"><a href="#cb25-135" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">let</span> s2 = fresh() <span class="kw">in</span></span>
+<span id="cb25-136"><a href="#cb25-136" aria-hidden="true" tabindex="-1"></a>                 { start = s1;</span>
+<span id="cb25-137"><a href="#cb25-137" aria-hidden="true" tabindex="-1"></a>                   final = [s2];</span>
+<span id="cb25-138"><a href="#cb25-138" aria-hidden="true" tabindex="-1"></a>                   trans = TransEps (s1,nfa1.start) ::</span>
+<span id="cb25-139"><a href="#cb25-139" aria-hidden="true" tabindex="-1"></a>                           TransEps (<span class="dt">List</span>.hd nfa1.final,nfa2.start) ::</span>
+<span id="cb25-140"><a href="#cb25-140" aria-hidden="true" tabindex="-1"></a>                           TransEps (<span class="dt">List</span>.hd nfa2.final, s2) ::</span>
+<span id="cb25-141"><a href="#cb25-141" aria-hidden="true" tabindex="-1"></a>                             (<span class="dt">List</span>.append nfa1.trans nfa2.trans) }</span>
+<span id="cb25-142"><a href="#cb25-142" aria-hidden="true" tabindex="-1"></a>  | Alt (r,s) -&gt; <span class="kw">let</span> nfa1 = thompson r <span class="kw">in</span></span>
+<span id="cb25-143"><a href="#cb25-143" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">let</span> nfa2 = thompson s <span class="kw">in</span></span>
+<span id="cb25-144"><a href="#cb25-144" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">let</span> s1 = fresh() <span class="kw">in</span></span>
+<span id="cb25-145"><a href="#cb25-145" aria-hidden="true" tabindex="-1"></a>                 <span class="kw">let</span> s2 = fresh() <span class="kw">in</span></span>
+<span id="cb25-146"><a href="#cb25-146" aria-hidden="true" tabindex="-1"></a>                 { start = s1;</span>
+<span id="cb25-147"><a href="#cb25-147" aria-hidden="true" tabindex="-1"></a>                   final = [s2];</span>
+<span id="cb25-148"><a href="#cb25-148" aria-hidden="true" tabindex="-1"></a>                   trans = TransEps (s1,nfa1.start) ::</span>
+<span id="cb25-149"><a href="#cb25-149" aria-hidden="true" tabindex="-1"></a>                           TransEps (s1,nfa2.start) ::  </span>
+<span id="cb25-150"><a href="#cb25-150" aria-hidden="true" tabindex="-1"></a>                           TransEps (<span class="dt">List</span>.hd nfa1.final, s2) ::</span>
+<span id="cb25-151"><a href="#cb25-151" aria-hidden="true" tabindex="-1"></a>                           TransEps (<span class="dt">List</span>.hd nfa2.final, s2) ::</span>
+<span id="cb25-152"><a href="#cb25-152" aria-hidden="true" tabindex="-1"></a>                             (<span class="dt">List</span>.append nfa1.trans nfa2.trans) }</span>
+<span id="cb25-153"><a href="#cb25-153" aria-hidden="true" tabindex="-1"></a>  | Star r -&gt; <span class="kw">let</span> nfa = thompson r <span class="kw">in</span></span>
+<span id="cb25-154"><a href="#cb25-154" aria-hidden="true" tabindex="-1"></a>              <span class="kw">let</span> s1 = fresh() <span class="kw">in</span></span>
+<span id="cb25-155"><a href="#cb25-155" aria-hidden="true" tabindex="-1"></a>              <span class="kw">let</span> s2 = fresh() <span class="kw">in</span></span>
+<span id="cb25-156"><a href="#cb25-156" aria-hidden="true" tabindex="-1"></a>              { start = s1;</span>
+<span id="cb25-157"><a href="#cb25-157" aria-hidden="true" tabindex="-1"></a>                final = [s2];</span>
+<span id="cb25-158"><a href="#cb25-158" aria-hidden="true" tabindex="-1"></a>                trans = TransEps (s1,nfa.start) ::</span>
+<span id="cb25-159"><a href="#cb25-159" aria-hidden="true" tabindex="-1"></a>                        TransEps (<span class="dt">List</span>.hd nfa.final, s2) ::</span>
+<span id="cb25-160"><a href="#cb25-160" aria-hidden="true" tabindex="-1"></a>                        TransEps (s1,s2) ::</span>
+<span id="cb25-161"><a href="#cb25-161" aria-hidden="true" tabindex="-1"></a>                        TransEps (s2,s1) ::</span>
+<span id="cb25-162"><a href="#cb25-162" aria-hidden="true" tabindex="-1"></a>                        nfa.trans }    </span>
+<span id="cb25-163"><a href="#cb25-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-164"><a href="#cb25-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-165"><a href="#cb25-165" aria-hidden="true" tabindex="-1"></a><span class="co">(* https://en.wikipedia.org/wiki/DOT_(graph_description_language) </span></span>
+<span id="cb25-166"><a href="#cb25-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-167"><a href="#cb25-167" aria-hidden="true" tabindex="-1"></a><span class="co">how to use:</span></span>
+<span id="cb25-168"><a href="#cb25-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-169"><a href="#cb25-169" aria-hidden="true" tabindex="-1"></a><span class="co"> printDotToFile &quot;MY.dot&quot; (thompson YOUR_REGEX)</span></span>
+<span id="cb25-170"><a href="#cb25-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-171"><a href="#cb25-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-172"><a href="#cb25-172" aria-hidden="true" tabindex="-1"></a><span class="co"> then on the command line:</span></span>
+<span id="cb25-173"><a href="#cb25-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-174"><a href="#cb25-174" aria-hidden="true" tabindex="-1"></a><span class="co"> dot -v -Teps -oMY.eps MY.dot</span></span>
+<span id="cb25-175"><a href="#cb25-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-176"><a href="#cb25-176" aria-hidden="true" tabindex="-1"></a><span class="co">*)</span></span>
+<span id="cb25-177"><a href="#cb25-177" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> toDot fsa =</span>
+<span id="cb25-178"><a href="#cb25-178" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span>  nonFinal = <span class="dt">List</span>.filter</span>
+<span id="cb25-179"><a href="#cb25-179" aria-hidden="true" tabindex="-1"></a>                      (<span class="kw">fun</span> s -&gt; <span class="dt">not</span> (<span class="dt">List</span>.mem s (fsa.final))) (allStates fsa) <span class="kw">in</span></span>
+<span id="cb25-180"><a href="#cb25-180" aria-hidden="true" tabindex="-1"></a>  (<span class="dt">String</span>.concat <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span> </span>
+<span id="cb25-181"><a href="#cb25-181" aria-hidden="true" tabindex="-1"></a>               [ <span class="st">&quot;digraph G {&quot;</span> ;</span>
+<span id="cb25-182"><a href="#cb25-182" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot;rankdir = LR;&quot;</span> ;</span>
+<span id="cb25-183"><a href="#cb25-183" aria-hidden="true" tabindex="-1"></a>                <span class="st">&quot; 0 -&gt; &quot;</span> ^ <span class="dt">string_of_int</span> (fsa.start)</span>
+<span id="cb25-184"><a href="#cb25-184" aria-hidden="true" tabindex="-1"></a>  ])</span>
+<span id="cb25-185"><a href="#cb25-185" aria-hidden="true" tabindex="-1"></a>  ^  </span>
+<span id="cb25-186"><a href="#cb25-186" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>  </span>
+<span id="cb25-187"><a href="#cb25-187" aria-hidden="true" tabindex="-1"></a>  ^</span>
+<span id="cb25-188"><a href="#cb25-188" aria-hidden="true" tabindex="-1"></a>  (<span class="dt">String</span>.concat <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb25-189"><a href="#cb25-189" aria-hidden="true" tabindex="-1"></a>   (<span class="dt">List</span>.map (<span class="kw">fun</span> s -&gt; <span class="dt">string_of_int</span> s ^ <span class="st">&quot;[shape = doublecircle];&quot;</span>)</span>
+<span id="cb25-190"><a href="#cb25-190" aria-hidden="true" tabindex="-1"></a>             fsa.final))</span>
+<span id="cb25-191"><a href="#cb25-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-192"><a href="#cb25-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-193"><a href="#cb25-193" aria-hidden="true" tabindex="-1"></a>  ^</span>
+<span id="cb25-194"><a href="#cb25-194" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>  </span>
+<span id="cb25-195"><a href="#cb25-195" aria-hidden="true" tabindex="-1"></a>  ^    </span>
+<span id="cb25-196"><a href="#cb25-196" aria-hidden="true" tabindex="-1"></a>  (<span class="dt">String</span>.concat <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb25-197"><a href="#cb25-197" aria-hidden="true" tabindex="-1"></a>         (<span class="dt">List</span>.map (<span class="kw">fun</span> s -&gt; <span class="dt">string_of_int</span> s ^ <span class="st">&quot;[shape = circle];&quot;</span>)</span>
+<span id="cb25-198"><a href="#cb25-198" aria-hidden="true" tabindex="-1"></a>                   nonFinal))</span>
+<span id="cb25-199"><a href="#cb25-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-200"><a href="#cb25-200" aria-hidden="true" tabindex="-1"></a>  ^</span>
+<span id="cb25-201"><a href="#cb25-201" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span>  </span>
+<span id="cb25-202"><a href="#cb25-202" aria-hidden="true" tabindex="-1"></a>  ^    </span>
+<span id="cb25-203"><a href="#cb25-203" aria-hidden="true" tabindex="-1"></a>  (<span class="dt">String</span>.concat <span class="st">&quot;</span><span class="ch">\n</span><span class="st">&quot;</span></span>
+<span id="cb25-204"><a href="#cb25-204" aria-hidden="true" tabindex="-1"></a>    (<span class="dt">List</span>.map</span>
+<span id="cb25-205"><a href="#cb25-205" aria-hidden="true" tabindex="-1"></a>      (<span class="kw">fun</span> t -&gt; <span class="kw">match</span> t <span class="kw">with</span></span>
+<span id="cb25-206"><a href="#cb25-206" aria-hidden="true" tabindex="-1"></a>                | TransChar (s1,c,s2) -&gt;</span>
+<span id="cb25-207"><a href="#cb25-207" aria-hidden="true" tabindex="-1"></a>                     (<span class="dt">string_of_int</span> s1) ^ <span class="st">&quot; -&gt; &quot;</span> ^ (<span class="dt">string_of_int</span> s2) ^</span>
+<span id="cb25-208"><a href="#cb25-208" aria-hidden="true" tabindex="-1"></a>                     <span class="st">&quot;[label = &quot;</span> ^ (<span class="dt">String</span>.make <span class="dv">1</span> c) ^ <span class="st">&quot;];&quot;</span></span>
+<span id="cb25-209"><a href="#cb25-209" aria-hidden="true" tabindex="-1"></a>                | TransEps (s1,s2) -&gt;</span>
+<span id="cb25-210"><a href="#cb25-210" aria-hidden="true" tabindex="-1"></a>                      (<span class="dt">string_of_int</span> s1) ^ <span class="st">&quot; -&gt; &quot;</span> ^ (<span class="dt">string_of_int</span> s2) ^ <span class="st">&quot;;&quot;</span>)</span>
+<span id="cb25-211"><a href="#cb25-211" aria-hidden="true" tabindex="-1"></a>      fsa.trans))</span>
+<span id="cb25-212"><a href="#cb25-212" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-213"><a href="#cb25-213" aria-hidden="true" tabindex="-1"></a>  ^</span>
+<span id="cb25-214"><a href="#cb25-214" aria-hidden="true" tabindex="-1"></a> <span class="st">&quot;</span><span class="ch">\n</span><span class="st"> }&quot;</span></span>
+<span id="cb25-215"><a href="#cb25-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-216"><a href="#cb25-216" aria-hidden="true" tabindex="-1"></a><span class="co">(* few examples *)</span></span>
+<span id="cb25-217"><a href="#cb25-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-218"><a href="#cb25-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-219"><a href="#cb25-219" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> printDotToFile fileName fsa = <span class="dt">output_string</span> (<span class="dt">open_out</span> fileName) (toDot fsa)</span>
+<span id="cb25-220"><a href="#cb25-220" aria-hidden="true" tabindex="-1"></a>                                            </span>
+<span id="cb25-221"><a href="#cb25-221" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> exR1 = Letter <span class="ch">&#39;a&#39;</span></span>
+<span id="cb25-222"><a href="#cb25-222" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> exR2 = Alt (Letter <span class="ch">&#39;a&#39;</span>, Letter <span class="ch">&#39;b&#39;</span>)</span>
+<span id="cb25-223"><a href="#cb25-223" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> exR3 = Seq (Letter <span class="ch">&#39;a&#39;</span>, Letter <span class="ch">&#39;b&#39;</span>)</span>
+<span id="cb25-224"><a href="#cb25-224" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> exR4 = Star exR2</span>
+<span id="cb25-225"><a href="#cb25-225" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> exR5 = Star exR3</span>
+<span id="cb25-226"><a href="#cb25-226" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> exR6 = Star exR4                </span>
+<span id="cb25-227"><a href="#cb25-227" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb25-228"><a href="#cb25-228" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> th1 = thompson exR4                   </span></code></pre></div>
+</div>
+<div id="brzozowskis-dfa-construction" class="slide section level1">
+<h1>Brzozowski’s DFA Construction</h1>
+<p>We will take a look at another approach of how to transform a RegEx
+into some FSA. This time we build a DFA (= deterministic finite
+automata).</p>
+<p>We apply a symbolic method where regular expressions themselves are
+treated like states. The method is due to Brzozowski. For a brief
+overview check <a
+href="https://en.wikipedia.org/wiki/Brzozowski_derivative">here</a>.</p>
+<h2 id="highlights">Highlights</h2>
+<p>Given some expression r and a symbol x, we obtain the
+<em>derivative</em> of r w.r.t. x, written d(r,x), by taking way the
+leading symbol x from r.</p>
+<p>In semantic terms, d(r,x) can be described as follows:</p>
+<pre><code>L(d(r,x)) = x \ L(r)</code></pre>
+<ul>
+<li><p>x  L(r) denotes the left quotient, i.e. the language
+<code>{ w | x . w in L(r)}</code>.</p>
+<ul>
+<li>We write <code>.</code> to denote concatenation. In some exposition
+this is left silent, i.e. <code>x w</code>.</li>
+</ul></li>
+<li><p>Hence, the derivative <code>d(r,x)</code> denotes the set of all
+words from L(R) where the leading symbol x has been removed.</p></li>
+</ul>
+<p>Thus, it is easy to solve the word problem. Let <code>w</code> be a
+word consisting of symbols <code>x1 . x2 .... xn-1 . xn</code>.</p>
+<p>Compute</p>
+<pre><code>d(r,x1) = r1
+d(r1,x2) = r2
+...
+d(rn-1,xn) = rn</code></pre>
+<p>That is, we repeatedly build the derivative of r w.r.t symbols
+xi.</p>
+<p>Check if the final expression <code>rn</code> is nullable. An
+expression s is <em>nullable</em> if epsilon in L(s).</p>
+<p>The derivative operation <code>d(r,x)</code> as well as the
+nullability test <code>n(r)</code> can be computed by some simple
+recursion over the structure of our RegEx language.</p>
+<pre><code>r,s ::= a | b | c | ...         Symbols aka letters taken from a finite alphabet
+    |  epsilon                  Empty word
+    |  phi                      Empty language
+    |  r + r                    Alternatives
+    |  r . r                    Sequence aka concatenation
+    |  r*                       Kleene star
+
+u,v,w ::= epsilon               empty word
+      |  w . w                  concatenation</code></pre>
+<h2 id="nullability">Nullability</h2>
+<p>How to check that an expression is <em>nullable</em>, i.e. it’s
+language denotation contains the empty string?</p>
+<p>We simply observe the various RegEx pattern constructs. We write
+<code>n(r)</code> to denote the nullability test which yields a Boolean
+value (true/false).</p>
+<pre><code>n(x) where xi is a symbol never holds.
+
+n(epsilon) always holds.
+
+n(phi) never holds.
+
+n(r + s) holds iff n(r) holds or n(s) holds.
+
+n(r . s) holds iff n(r) holds and n(s) holds.
+
+n(r*) always holds.</code></pre>
+<h2 id="derivatives">Derivatives</h2>
+<p>We write <code>d(r,x)</code> to denote the derivative obtained by
+extracting the leading symbol <code>x</code> from expression
+<code>r</code>. For each derivative, we wish that the following holds:
+<code>L(d(r,x)) = x \ L(r)</code>.</p>
+<p>As in case of the nullability test, the derivative operation is
+defined by observing the structure of regular expression patterns.
+Instead of a Boolean value, we yield another expression (the
+derivative).</p>
+<pre><code>d(x,y) =   either epsilon if x == y or phi otherwise
+
+d(epsilon,y) = phi
+
+d(phi,y)     = phi
+
+d(r + s, y)  = d(r,y) + d(s,y)
+
+d(r . s, y)  =  if n(r)
+                then d(r,y) . s +  d(s,y)
+                else d(r,y) . s
+
+d(r*, y)     = d(r,y) . r*</code></pre>
+<p>Some examples.</p>
+<p>Let’s build the derivative of some expressions.</p>
+<pre><code>d((x . y)*, x) = d(x . y, x) . (x . y)*
+               = d(x,x) . y . (x . y)*
+               = epsilon . y . (x . y)*
+
+
+d(x* . x, x) = d(x*, x) . x + d(x,x)
+             = d(x,x) . x* . x + epsilon
+             = epsilon . x* . x + epsilon
+
+d(x*, x) = d(x,x) . x*
+         = epsilon . x*</code></pre>
+<p>Shorthand: We write <code>r --x--&gt; s</code> for
+<code>s = d(r,x)</code>.</p>
+<pre><code>       x*
+--x--&gt; d(x,x) . x*
+       = epsilon . x*
+--x--&gt; d(epsilon . x*, x)
+       = d(epsilon,x) . x* + d(x*,x)
+       = phi . x* + epsilon . x*
+--x--&gt; d(phi . x* + epsilon . x*, x)
+       = d(phi . x*, x) + d(epsilon . x*, x)
+       = phi . x* + phi . x* + epsilon . x*</code></pre>
+<p>Observation:</p>
+<ul>
+<li><p>If we repeatedly build the derivative, the size of the resulting
+terms is growing.</p></li>
+<li><p>Semantically, all terms are equal to <code>x*</code>.</p></li>
+</ul>
+<h2 id="simplifications">Simplifications</h2>
+<p>Checking for semantic equivalence is costly (to reduce the size of
+derivatives).</p>
+<p>Brzozowski observed that few (syntactic) simplification rules are
+sufficient to ensure that the size of derivatives will not grow.</p>
+<pre><code>(Idempotence)  r + r = r
+
+(Associativity) (r + s) + t = r + (s + t)
+
+(Commutativity) r + s = s + r</code></pre>
+<p>The (Idempotence) rule says in case of syntactically equal elements
+in an alternative, we can drop one of the elements.</p>
+<p>The (Associativity) and (Commutativity) rule are for convenience so
+that we can move (syntactically) equal elements next to each other.</p>
+<p>For example, consider</p>
+<pre><code>           (r + s) + r
+=_Comm     r + (r + s)
+=_Assoc    (r + r) + s
+=_Idemp    r + s</code></pre>
+<p>Your first project task is to implement the derivative and
+simplification procedure for derivatives in terms of OCaml. To help
+those more familiar with OO, below is a brief sketch in some pseudo OO
+language.</p>
+<h2 id="sketch-of-oo-implementation">Sketch of OO implementation</h2>
+<p>Here’s a sketch of an OO-based implementation making use of
+inheritance and virtual methods.</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode java"><code class="sourceCode java"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">abstract</span> <span class="kw">class</span> RE <span class="op">{</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>   <span class="fu">n</span><span class="op">()</span> <span class="dt">boolean</span><span class="op">;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">d</span><span class="op">(</span><span class="dt">char</span><span class="op">)</span> RE<span class="op">;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Phi <span class="op">:</span> RE <span class="op">{</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Phi</span><span class="op">()</span> <span class="op">{}</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">false</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">d</span><span class="op">(</span><span class="dt">char</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="fu">Phi</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>    </span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Eps <span class="op">:</span> RE <span class="op">{</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Eps</span><span class="op">()</span> <span class="op">{}</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="kw">true</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">d</span><span class="op">(</span><span class="dt">char</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="fu">Phi</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span>    </span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Alt <span class="op">:</span> RE <span class="op">{</span></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>    RE left<span class="op">,</span> right<span class="op">;</span></span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Alt</span> <span class="op">(</span>RE x<span class="op">,</span> RE y<span class="op">)</span> <span class="op">{</span> left <span class="op">=</span> x<span class="op">;</span> right <span class="op">=</span> y<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> left<span class="op">.</span><span class="fu">n</span><span class="op">()</span> <span class="op">||</span> right<span class="op">.</span><span class="fu">n</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">d</span><span class="op">(</span><span class="dt">char</span> x<span class="op">)</span> <span class="op">{</span> <span class="cf">return</span> <span class="fu">Alt</span><span class="op">(</span>left<span class="op">.</span><span class="fu">d</span><span class="op">(</span>x<span class="op">),</span> right<span class="op">.</span><span class="fu">d</span><span class="op">(</span>x<span class="op">));</span> <span class="op">}</span></span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Seq <span class="op">:</span> RE <span class="op">{</span></span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>    RE left<span class="op">,</span> right<span class="op">;</span></span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Seq</span> <span class="op">(</span>RE x<span class="op">,</span> RE y<span class="op">)</span> <span class="op">{</span> left <span class="op">=</span> x<span class="op">;</span> right <span class="op">=</span> y<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">n</span><span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> left<span class="op">.</span><span class="fu">n</span><span class="op">()</span> <span class="op">&amp;&amp;</span> right<span class="op">.</span><span class="fu">n</span><span class="op">();</span> <span class="op">}</span></span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">d</span><span class="op">(</span><span class="dt">char</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>left<span class="op">.</span><span class="fu">n</span><span class="op">())</span> <span class="op">{</span></span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>           <span class="cf">return</span> <span class="fu">Alt</span><span class="op">(</span><span class="fu">Seq</span> <span class="op">(</span>left<span class="op">.</span><span class="fu">d</span><span class="op">(</span>x<span class="op">),</span> right<span class="op">),</span> right<span class="op">.</span><span class="fu">d</span><span class="op">(</span>x<span class="op">));</span></span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>       <span class="cf">return</span> <span class="fu">Seq</span> <span class="op">(</span>left<span class="op">.</span><span class="fu">d</span><span class="op">(</span>x<span class="op">),</span> right<span class="op">);</span></span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span>   </span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="ocaml-implementation">OCaml implementation</h2>
+<p>See Project 1.</p>
+</div>
+<div id="disambiguation" class="slide section level1">
+<h1>Disambiguation</h1>
+<p>Consider the expression</p>
+<pre><code>(a+b)* + a.b.a</code></pre>
+<p>The expression is ambiguous in the sense that the input string
+<code>a.b.a</code> matches the left as well as the right component.</p>
+<p>Checking if a regular expression is ambiguous is decidable. However,
+often we cannot avoid ambiguities.</p>
+<p>For example, consider regular expressions to specify the valid set of
+identifiers as well as some key words such as</p>
+<pre><code>[&#39;a&#39;-&#39;z&#39;]+ | &quot;while&quot; | &quot;for&quot;</code></pre>
+<p>Aside: Change in syntax. I’m using some concrete source syntax where
+I write <code>|</code> for alternatives and <code>+</code> for one or
+more repetitions. <code>['a'-'z']</code> is referred to as a character
+class and is a shorthand for <code>'a'|...|'z'</code>.</p>
+<p>There are several disambiguation strategies (to decide which match
+shall be chosen in case there are several possibilities). Two popular
+disambiguation strategies are Greedy and POSIX. There are some subtle
+differences between both. We will assume Greedy which selects the
+“earliest left-most match” (whereas POSIX selects the “longest left-most
+match”). You will find more (formal) details here: <a
+href="http://www.home.hs-karlsruhe.de/~suma0002/publications/DerivativesDiagnosisRegExAmbiguity.pdf">Derivative-Based
+Diagnosis of Regular Expression Ambiguity</a></p>
+</div>
+<div id="submatching-versus-parsing" class="slide section level1">
+<h1>(Sub)Matching versus Parsing</h1>
+<p>As can be seen from the above example, we are not only interested to
+know if a regular expression matches a string but wish to know which
+subparts of the expression match which substring.</p>
+<p><em>Submatching</em> refers to process of relating subexpressions to
+the substrings they match. To refer to submatches, we annotate
+expressions with submatch annotations (we roughly follow the syntax of
+the OCaml lexer tool to be used later).</p>
+<pre><code>&quot;while&quot; as x1 | &quot;for&quot; as x2 | [&#39;a&#39;-&#39;z&#39;]+ as x3</code></pre>
+<p>In case of Kleene star there may be several (repeated) matches. For
+efficiency reasons, only the last match is kept.</p>
+<p>A subexpression does not need to be annotated which means that we not
+interested in that match and that match shall be ignored. For example,
+in case of lexical analysis we ignore white space etc.</p>
+<p><em>Parsing</em> obtains information about which subexpression match
+which substrings (like in case of submatching) but generally produces an
+abstract syntax tree representation from which all submatch information
+can be derived.</p>
+<p>The abstract syntax tree (AST) can be viewed as a “proof” that a
+expression matches a string.</p>
+<p>For our regular expression language</p>
+<pre><code>r,s ::= a | b | c | ...         Symbols aka letters taken from a finite alphabet
+    |  epsilon                  Empty word
+    |  phi                      Empty language
+    |  r + r                    Alternatives
+    |  r . r                    Sequence aka concatenation
+    |  r*                       Kleene star</code></pre>
+<p>we use the following AST representation</p>
+<pre><code>u,v ::= epsilon | x | L u | R u | (u,u) | [u1,...,un]
+
+L stands for Left
+R stands for Right</code></pre>
+<p>Example:</p>
+<pre><code>Expression:  (a + (b + a.b))*
+
+Input: a.b
+
+Parse trees/ASTs:
+
+[L a, L (R b)]
+
+[R (R (a,b))]</code></pre>
+<p>How to obtain a AST for a given regular expression and input
+word?</p>
+<p>Let’s ask a different question. How to decide that a AST is valid for
+a regular expression?</p>
+<h2
+id="parsing---proofs-are-programs---curry-howard-isomorphism">Parsing -
+Proofs are Programs - Curry-Howard Isomorphism</h2>
+<p>The membership tests provides us with a yes/no answer (if an
+expression matches/not matches a word). We wish to obtain more details
+why/how the match took place. In a first step, we consider a more
+operational representation of L(r). We introduce judgments
+<code>|- w in L(r)</code> to represent that w is a word in the language
+denoted by r. We use a natural deduction style proof system to deduce
+all valid judgments.</p>
+<pre><code>(Eps) |- epsilon : L(epsilon)
+
+
+(Sym) |- x : L(x)
+
+          |- w : L(r)
+(Alt-L)  -------------------
+          |- w : L(r + s)
+
+          |- w : L(s)
+(Alt-R)  -------------------
+          |- w : L(r + s)
+
+          w = w1 . w2 for some w1 and w2
+          |- w1 : L(r)
+          |- w2 : L(s)
+(Conc)  -----------------------
+          |- w : L(r . s)
+
+(Star-0) |- epsilon : L(r*)
+
+          w = w1 . w2 for some w1 and w2
+          |- w1 : L(r)
+          |- w2 : L(r*)
+(Star-N) --------------------
+          |- w : L(r*)</code></pre>
+<p>Here is an example derivation for
+<code>|- x.y : L((x+y)*)</code>.</p>
+<pre><code>                             (Sym)    |- y : L(y) 
+                             (Alt-R)  ----------------
+    (Sym)   |- x : L(x)               |- y : L(x+y)   (Eps) |- epsilon : L((x+y)*)
+    (Alt-L) --------------   (Star-N) --------------------------------------------
+            |- x : L(x+y)             |- y : L((x+y)*)
+(Star-N)   --------------------------------------------
+            |- x.y : L((x+y)*)</code></pre>
+<p>The derivation is written as a (upside down) tree.</p>
+<ul>
+<li><p>The root note is to be proven statement
+<code>|- x.y : L((x+y)*)</code></p></li>
+<li><p>Leave nodes represent axioms (proof rules without any
+premise).</p></li>
+<li><p>Intermediate nodes represent application of proof rules.</p></li>
+</ul>
+<p>We seek for a compact representation of this derivation tree.</p>
+<p>Idea:</p>
+<ul>
+<li><p>Attach proof terms to the above proof rules.</p></li>
+<li><p>Proof terms are a compact representation of derivation
+trees</p></li>
+</ul>
+<p>This is a well-known idea referred to as the “proofs are programs
+principle” and is due to Curry and Howard. Hence, this idea is also
+known as the Curry-Howard isomorphism. In case of context-free grammars
+(CFG), this is know as parsing where a parse tree effectively represents
+a compact proof of the derivation.</p>
+<p>Proof terms are as follows.</p>
+<pre><code> u,v ::= epsilon | x | L u | R u | (u,u) | [u1,...,un]
+
+We use OCaml notation for lists.
+
+us ::= [] | u :: us
+
+[u1,u2] is a shorthand for u1 : (u2 :: [])</code></pre>
+<p>We attach proof terms u to judgments <code>|- w : L(r)</code>. As we
+will shortly see, word w is redundant. Hence, we make use of judgments
+of the form <code>|- u : r</code>.</p>
+<pre><code>(Eps) |- epsilon : epsilon
+
+
+(Sym) |- x : x
+
+          |- u : r
+(Alt-L)  -------------------
+          |- L u : r + s
+
+          |- u : s
+(Alt-R)  -------------------
+          |- R u : r + s
+
+          |- u1 : r
+          |- u2 : s
+(Conc)  -----------------------
+          |- (u1,u2) : r . s
+
+(Star-0) |- [] : r*
+
+          |- u : r
+          |- us : r*
+(Star-N) --------------------
+          |- u::us : r*</code></pre>
+<p>Each proof term implies a word which we obtain by flattening the
+proof term.</p>
+<pre><code>|epsilon| = epsilon
+
+|x| = x
+
+|L u| = |u|
+
+|R u| = |u|
+
+|(u,v)| = |u| . |v|
+
+|[]| = epsilon
+
+|u :: us| = |u| . |us|</code></pre>
+<pre><code>Property: w in L(r) iff |- u : r where |u| = w</code></pre>
+<p>TODO: Show construction of proof terms based on derivatives.</p>
+</div>
+<div id="extended-regular-expressions" class="slide section level1">
+<h1>Extended Regular Expressions</h1>
+<p>As discussed earlier, certain extensions can be expressed in terms of
+existing language constructs. Others such as negation are more
+involved.</p>
+<p>Aside: The language of regular expressions is closed under negation
+(complement). But the process to obtain the expression representing the
+complement of another expression is rather involved.</p>
+<p>How to adapt the Thomspon NFA and Brzozowski DFA method to include
+negation (complement)?</p>
+</div>
+<div id="lexical-analysis" class="slide section level1">
+<h1>Lexical Analysis</h1>
+<p>Goal:</p>
+<ul>
+<li><p>Identify the <em>atomic</em> units of a programming language we
+are interested in by grouping characters into tokens.</p></li>
+<li><p>The (later) syntax analysis phase will then check if tokens form
+a valid phrase (i.e. the program is syntactically valid).</p></li>
+</ul>
+<p>Hence, this process is also referred to as <em>tokenization</em>.
+It’s done more for convenience to break the syntax analysis part into
+more manageable pieces.</p>
+<h2 id="terminology">Terminology</h2>
+<p><em>Pattern</em>: Regular expression to describe patterns of input we
+are interested in.</p>
+<p><em>Lexeme</em>: String (word) that matches a pattern.</p>
+<p><em>Token</em>: Output of lexical analysis. Instead of reporting the
+lexeme we typically generate a more compact representation. Token may
+have attributes (can be the underlying lexeme or some other value).</p>
+<h2 id="example">Example</h2>
+<p>We use OCamllex syntax.</p>
+<div class="sourceCode" id="cb48"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>| [<span class="ch">&#39;a&#39;</span>-<span class="ch">&#39;z&#39;</span>] <span class="kw">as</span> lxm { LETTER lxm }</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>Pattern: [<span class="ch">&#39;a&#39;</span>-<span class="ch">&#39;z&#39;</span>] which is shorthand <span class="kw">for</span> the alternative among all lowercase letters</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>Lexeme: character <span class="ch">&#39;b&#39;</span> <span class="kw">for</span> example</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>Token: LETTER <span class="ch">&#39;b&#39;</span></span></code></pre></div>
+<p>Here are excerpts of the lexer rules for the regular expression
+language discussed in project 1.</p>
+<div class="sourceCode" id="cb49"><pre
+class="sourceCode ocaml"><code class="sourceCode ocaml"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>        rule token = parse</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>            [<span class="ch">&#39;\n&#39;</span> ]        { EOL }</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>          | [<span class="ch">&#39;a&#39;</span>-<span class="ch">&#39;z&#39;</span>] <span class="kw">as</span> lxm { LETTER lxm }</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>          | <span class="ch">&#39;+&#39;</span>            { PLUS }</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>          | <span class="ch">&#39;*&#39;</span>            { STAR }</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>          | <span class="ch">&#39;(&#39;</span>            { LPAREN }</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>          | <span class="ch">&#39;)&#39;</span>            { RPAREN }</span></code></pre></div>
+<p>The input string</p>
+<pre><code>(ab*)+c</code></pre>
+<p>is turned into the sequence of tokens</p>
+<pre><code>LPAREN (LETTER &#39;a&#39;) (LETTER &#39;b&#39;) STAR RPAREN PLUS (LETTER &#39;c&#39;)</code></pre>
+<p>You can use a lexical analysis tool (such as OCamllex) on its own. In
+general, there is a tight integration between lexical analysis and
+syntax analysis as the syntax analysis part will operate on the sequence
+of tokens instead of the plain sequence of characters as found in the
+source program.</p>
+</div>
+<div id="summary" class="slide section level1">
+<h1>Summary</h1>
+<ul>
+<li><p>Syntax matters.</p></li>
+<li><p>Compiler (Thompson NFA) versus Interpreter (Brzozowski
+derivatives).</p>
+<ul>
+<li><p>Can build set of dissimilar derivatives beforehand (=&gt;
+compiler).</p></li>
+<li><p>Can also build on-the-fly (=&gt; just-in time compiler).</p></li>
+</ul></li>
+<li><p>We will use regular expressions for lexical analysis.</p></li>
+</ul>
+</div>
+</body>
+</html>
